@@ -1,0 +1,3 @@
+Sim, você pode configurar um cron job para executar automaticamente o comando git pull no servidor em intervalos específicos. Isso é útil para garantir que seu servidor esteja sempre sincronizado com o repositório remoto sem precisar executar manualmente o comando cada vez.
+
+Aqui estão os passos para configurar um cron job para rodar o git pull periodicamente:
