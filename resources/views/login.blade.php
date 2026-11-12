@@ -375,7 +375,7 @@
         <section class="login-panel">
             <div class="login-card-school">
                 <div class="login-brand">
-                    <img src="{{ URL('/logotipo/progresso.png') }}" alt="Colégio Lhaysso">
+                    <img src="{{ URL('/logotipo/.png') }}" alt="Colégio Lhaysso">
                     <div>
                         <strong>Colégio Progresso</strong>
                         <span>No caminho certo para aprender e crescer.</span>
@@ -424,7 +424,7 @@
                         <a href="https://wa.me/258841010350" target="_blank" rel="noopener noreferrer">WhatsApp 84 101 0350</a>.
                     </p>
 
-                    <a class="back-home" href="{{ route('raiz') }}#inicio">
+                    <a class="back-home" href="https://www.colegioprogresso.co.mz/">
                         <i class="fa fa-angle-left"></i> Voltar ao site do colégio
                     </a>
                 </form>
