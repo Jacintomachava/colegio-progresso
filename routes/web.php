@@ -55,6 +55,10 @@ Route::get('/', [IndexController::class, 'index'])->name('index');
 
 Route::get('/', [IndexController::class, 'index'])->name('raiz');
 
+Route::get('/', function () {
+    return view('login');
+})->name('logar');
+
 Route::get('/api/turma/{classeId}/{escolaId}', [TurmaController::class, 'apiTurma']);
 
 Route::get('/politica-de-privacidade', function () {
