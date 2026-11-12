@@ -59,7 +59,7 @@
               <div class="login-main"> 
                 <form class="theme-form" id="formulario">
                   <center>
-                    <img  src="{{ URL('/logotipo/lhaysso.png')}}" width="150" height="150" alt="looginpage">
+                    <img  src="{{ URL('/logotipo/progresso.png') }}" width="150" height="150" alt="looginpage">
                   </center>
 
                   @csrf

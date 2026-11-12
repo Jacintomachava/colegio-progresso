@@ -222,7 +222,7 @@
 </div>
 <div class="footer">
         <div>
-            Contactos  <i><b>{{$escola->telefone}}/{{$escola->telefone2}}   </b></i> site <u>https://lhaysso.ac.mz</u> WhatsApp +258 86 824 4468 <b>{{$escola->slogan}}</b>   
+            Contactos  <i><b>{{$escola->telefone}}/{{$escola->telefone2}}   </b></i> site <u>{{$matricula->escola->site}}</u>  <b>{{$escola->slogan}}</b>   
         </div>
  </div>
 

@@ -59,7 +59,7 @@
             color: #ffffff;
             background:
                 linear-gradient(180deg, rgba(7, 59, 50, .2), rgba(7, 59, 50, .88)),
-                url("{{ asset('/assets/lhaysso-landing/hero-estudantes.jpeg') }}") center / cover no-repeat;
+                url("{{ asset('/images/turma.png') }}") center / cover no-repeat;
             overflow: hidden;
         }
 
@@ -367,7 +367,7 @@
         <section class="login-visual">
             <div class="visual-content">
                 <div class="visual-pill"><i class="fa fa-star"></i> Área restrita escolar</div>
-                <h1>Colégio Lhaysso</h1>
+                <h1>Colégio Progresso</h1>
                 <p>Acesso reservado para alunos, professores e equipa administrativa acompanharem a vida escolar com segurança.</p>
             </div>
         </section>
@@ -375,10 +375,10 @@
         <section class="login-panel">
             <div class="login-card-school">
                 <div class="login-brand">
-                    <img src="{{ URL('/logotipo/lhaysso.png') }}" alt="Colégio Lhaysso">
+                    <img src="{{ URL('/logotipo/progresso.png') }}" alt="Colégio Lhaysso">
                     <div>
-                        <strong>Kindergarten and School</strong>
-                        <span>Meu filho, meu tesouro</span>
+                        <strong>Colégio Progresso</strong>
+                        <span>No caminho certo para aprender e crescer.</span>
                     </div>
                 </div>
 
@@ -421,7 +421,7 @@
 
                     <p class="login-help">
                         Precisa de ajuda? Contacte a secretaria pelo
-                        <a href="https://wa.me/258878403247" target="_blank" rel="noopener noreferrer">WhatsApp 878403247</a>.
+                        <a href="https://wa.me/258841010350" target="_blank" rel="noopener noreferrer">WhatsApp 84 101 0350</a>.
                     </p>
 
                     <a class="back-home" href="{{ route('raiz') }}#inicio">

@@ -250,7 +250,7 @@
 
 <div class="footer">
         <div>
-             Matriculado por  <i><b>{{$matricula->user->nome}}  </b></i> site <u>https://lhaysso.ac.mz</u> WhatsApp +258 86 824 4468 <b>{{$matricula->escola->slogan}}</b>    
+             Matriculado por  <i><b>{{$matricula->user->nome}}  </b></i> site <u>{{$matricula->escola->site}}</u>  <b>{{$matricula->escola->slogan}}</b>    
         </div>
  </div>
 

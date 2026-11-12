@@ -189,21 +189,21 @@
     
     <table class="table table-bordered" style="font-size: 9pt">
         <tr>
-            <th colspan="5" style="background-color:#808387; color: white "><center>FORMA DE PAGAMENTO DA MATRICULA</center></th>
+            <th colspan="3" style="background-color:#808387; color: white "><center>FORMA DE PAGAMENTO DA MATRICULA</center></th>
         </tr>
         <tr>
-            <td><b>ENTIDADE</b></td>
+            <td hidden><b>ENTIDADE</b></td>
             <td><b>REFERÊNCIA</b></td>
             <td><b>VALOR TOTAL </b></td>
             <td><b>PRAZO PAG.</b></td>
-            <td><b>BANCO</b></td>
+            <td hidden><b>BANCO</b></td>
         </tr>
         <tr>
-            <td>{{$pagamento->entidade}}</td>
+            <td hidden>{{$pagamento->entidade}}</td>
             <td>{{$pagamento->referencia}}</td>
             <td>{{ number_format($pagamento->valor, 2, ',', '.') }}</td>
             <td>{{ \Carbon\Carbon::parse($pagamento->prazo_pagamento)->format('d-M-Y') }}</td>
-            <td>Millennium BIM</td>
+            <td hidden>Millennium BIM</td>
         </tr>
     </table>
 
@@ -227,7 +227,7 @@
 </div>
 <div class="footer">
         <div>
-             Matriculado por  <i><b>{{$matricula->user->nome}}  </b></i> site <u>http://lhaysso.ac.mz</u> WhatsApp +258 86 824 4468 <b>{{$matricula->escola->slogan}}</b>
+             Matriculado por  <i><b>{{$matricula->user->nome}}  </b></i> site <u>{{$matricula->escola->site}}</u>  <b>{{$matricula->escola->slogan}}</b>
                  
         </div>
  </div>

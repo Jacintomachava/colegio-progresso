@@ -123,7 +123,7 @@
                           </div>
                           <ul class="profile-dropdown onhover-show-div">
                             @if(Auth::user()->todas_escolas==1)
-                              <li><a href="{{route('mudarEscola.index')}}">
+                              <li hidden><a href="{{route('mudarEscola.index')}}">
                                 <div class="profile-icon">
                                   <svg>
                                     <use href="{{ URL('/assets/svg/icon-sprite.svg#stroke-home') }}"></use>
