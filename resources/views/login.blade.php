@@ -9,8 +9,8 @@
     <meta name="author" content="Colégio Lhaysso">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <link rel="icon" href="{{ URL('/logotipo.png') }}" type="image/x-icon">
-    <link rel="shortcut icon" href="{{ URL('/logotipo.png') }}" type="image/x-icon">
+    <link rel="icon" href="{{ URL('/logotipo/progresso.png') }}" type="image/x-icon">
+    <link rel="shortcut icon" href="{{ URL('/logotipo/progresso.png') }}" type="image/x-icon">
     <title>Área Restrita | Colégio Progresso</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -375,7 +375,7 @@
         <section class="login-panel">
             <div class="login-card-school">
                 <div class="login-brand">
-                    <img src="{{ URL('/logotipo.png') }}" alt="Colégio Progresso">
+                    <img src="{{ URL('/logotipo/progresso.png') }}" alt="Colégio Progresso">
                     <div>
                         <strong>Colégio Progresso</strong>
                         <span>No caminho certo para aprender e crescer.</span>

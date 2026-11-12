@@ -5,8 +5,8 @@
     <meta name="keywords" content="Colegio Progresso">
     <meta name="author" content="pixelstrap">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link rel="icon" href="{{ URL('/logotipo.png') }}" type="image/x-icon">
-    <link rel="shortcut icon" href="{{ URL('/logotipo.png') }}" type="image/x-icon">
+    <link rel="icon" href="{{ URL('/logotipo/progresso.png') }}" type="image/x-icon">
+    <link rel="shortcut icon" href="{{ URL('/logotipo/progresso.png') }}" type="image/x-icon">
     <title>Criar Conta</title>
     <!-- Google font-->
     <link rel="preconnect" href="https://fonts.googleapis.com">
