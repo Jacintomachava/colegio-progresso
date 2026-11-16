@@ -87,12 +87,6 @@ class FuncionarioController extends Controller
             'telefone' => ['required', 'string', 'max:30'],
             'email' => ['nullable', 'email', 'max:255'],
             'escola' => ['required', 'integer', 'exists:escolas,id'],
-            'imagem' => [
-                'nullable',
-                File::image()
-                    ->types(['jpg', 'jpeg', 'png', 'webp'])
-                    ->max('2mb'),
-            ],
             'alunos' => ['nullable', 'array'],
             'alunos.*' => ['integer'],
         ]);
@@ -103,12 +97,6 @@ class FuncionarioController extends Controller
             $escola = Escola::findOrFail($dados['escola']);
 
             // Guarda o ficheiro fora da pasta public.
-            // O nome é gerado pelo servidor.
-            if ($request->hasFile('imagem')) {
-                $caminhoImagem = $request
-                    ->file('imagem')
-                    ->store('avatares', 'local');
-            }
 
             DB::beginTransaction();
 
@@ -166,11 +154,6 @@ class FuncionarioController extends Controller
             $userFuncionario->escola_id = $escola->id;
             $userFuncionario->funcionario = 1;
 
-            if ($caminhoImagem) {
-                $userFuncionario->avatar = $caminhoImagem;
-                $funcionario->avatar = $caminhoImagem;
-            }
-
             $funcionario->save();
             $userFuncionario->save();
 
@@ -195,10 +178,6 @@ class FuncionarioController extends Controller
 
         } catch (\Throwable $e) {
             DB::rollBack();
-
-            if ($caminhoImagem) {
-                Storage::disk('local')->delete($caminhoImagem);
-            }
 
             report($e);
 
