@@ -158,7 +158,7 @@
                         <input class="form-control" type="text" name="telefone" placeholder="Telefone" >
                       </div>
 
-                      <div class="col-3" hidden>
+                      <div class="col-3" >
                         <label class="form-label" for="confirmpasswordwizard">Foto Perfil</label>
                         <input class="form-control"  type="file" name="imagem" placeholder="Foto Perfil" >
                       </div>
