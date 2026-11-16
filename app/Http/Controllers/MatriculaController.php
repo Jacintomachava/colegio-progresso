@@ -542,7 +542,7 @@ class MatriculaController extends Controller
             $descontoPercentual = $request->input('desconto');
 
             $todosPagamento = Pagamento::all();
-            $fatura = str_pad(count($totalMatriculas) + 1, 3, '0', STR_PAD_LEFT).''.$current_month.''.$escola->codigo.''.$year_last_two_digits;
+            $fatura = str_pad(count($totalMatriculas) + 4, 3, '0', STR_PAD_LEFT).''.$current_month.''.$escola->codigo.''.$year_last_two_digits;
             $codigoMatricula = str_pad(count($totalMatriculas) + 1, 5, '0', STR_PAD_LEFT).'.'.$year_last_two_digits;
             $recibo = str_pad(count($todosPagamento) + 1, 5, '0', STR_PAD_LEFT).''.$year_last_two_digits;
 

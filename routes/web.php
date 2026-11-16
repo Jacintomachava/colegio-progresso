@@ -34,6 +34,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\TempleteSMSController;
 use App\Http\Controllers\WhatsAppController;
 use App\Http\Controllers\ApiEntidadeReferenciaController;
+use App\Http\Controllers\ProgressoMatriculaController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -69,6 +70,13 @@ Route::get('/termos-de-servico', function () {
 Route::get('/api/v1/validacao/bim', [ApiEntidadeReferenciaController::class, 'validarDocumento']);
 // Endpoint Para Registo de Documento no BIM ENtidade e Referencia
 Route::get('/api/v1/registo/bim', [ApiEntidadeReferenciaController::class, 'registoPagamento']);
+
+
+Route::middleware('auth')->group(function () {
+    Route::get('/progresso/matriculas/criar', [ProgressoMatriculaController::class, 'create'])->name('progresso.matriculas.create');
+    Route::post('/progresso/matriculas', [ProgressoMatriculaController::class, 'store'])->name('progresso.matriculas.store');
+});
+
 
 // Autenticacao
 Route::post('/autenticar', [AuthUserController::class, 'login'])->name('autenticacao');
