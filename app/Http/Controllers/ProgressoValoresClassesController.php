@@ -50,70 +50,40 @@ class ProgressoValoresClassesController extends Controller
 
     public function update(Request $request, int $id)
     {
-        $escolaId = (int) Auth::user()->escola_id;
+        $escolaId = (int) auth()->user()->escola_id;
 
-        /*
-        |--------------------------------------------------------------------------
-        | 1. LOCALIZAR REGISTO
-        |--------------------------------------------------------------------------
-        */
-        $registo = DB::table('progresso_valores_classes')
+        $dados = $request->validate([
+            'valor_matricula' => ['required', 'numeric', 'min:0'],
+            'valor_renovacao' => ['required', 'numeric', 'min:0'],
+            'valor_propina' => ['required', 'numeric', 'min:0'],
+        ]);
+
+        $actualizados = DB::table('progresso_valores_classes')
             ->where('id', $id)
             //->where('escola_id', $escolaId)
-            ->first();
-
-        if (!$registo) {
-            return response()->json([
-                'status' => 0,
-                'message' => 'Registo não encontrado nesta escola.'
-            ], 404);
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | 2. VALIDAR DADOS
-        |--------------------------------------------------------------------------
-        */
-        $dados = $this->validar($request, $escolaId);
-
-        $this->verificarDuplicado($escolaId, $dados, $id);
-
-        /*
-        |--------------------------------------------------------------------------
-        | 3. ACTUALIZAR CAMPOS PERMITIDOS
-        |--------------------------------------------------------------------------
-        */
-        $afectados = DB::table('progresso_valores_classes')
-            ->where('id', $id)
-            ->where('escola_id', $escolaId)
             ->update([
-                'ano_academico_id' => $dados['ano_academico_id'],
-                'classe_id' => $dados['classe_id'],
                 'valor_matricula' => $dados['valor_matricula'],
                 'valor_renovacao' => $dados['valor_renovacao'],
                 'valor_propina' => $dados['valor_propina'],
-                'mes_inicio' => $dados['mes_inicio'],
-                'mes_fim' => $dados['mes_fim'],
-                'estado' => $dados['estado'],
                 'updated_at' => now(),
             ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | 4. VERIFICAR RESULTADO
-        |--------------------------------------------------------------------------
-        */
-        $actualizado = DB::table('progresso_valores_classes')
-            ->where('id', $id)
-            ->first();
+        if (!$actualizados) {
+            $existe = DB::table('progresso_valores_classes')
+                ->where('id', $id)
+                //->where('escola_id', $escolaId)
+                ->exists();
+
+            if (!$existe) {
+                return response()->json([
+                    'message' => 'Registo não encontrado.'
+                ], 404);
+            }
+        }
 
         return response()->json([
             'status' => 1,
-            'message' => 'Operação de actualização executada.',
-            'id_recebido' => $id,
-            'escola_id' => $escolaId,
-            'linhas_afectadas' => $afectados,
-            'dados_actuais' => $actualizado,
+            'message' => 'Valores actualizados com sucesso.'
         ]);
     }
 

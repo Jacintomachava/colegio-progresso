@@ -71,25 +71,6 @@
                         </svg><span class="lan-3">Recibos</span></a>
                 </li>
 
-                <li class="sidebar-list"><i class="fa fa-thumb-tack"></i>
-                    <label class="badge badge-light-primary">1</label><a class="sidebar-link sidebar-title" href="{{ route('progresso.valores-classes.index') }}">
-                        <svg class="stroke-icon">
-                        <use href="{{ URL('/assets/svg/icon-sprite.svg#stroke-icons') }}"></use>
-                        </svg><span class="lan-3">Valores por Classe</span></a>
-                </li>
-
-                <li class="sidebar-list"><i class="fa fa-thumb-tack"></i>
-                    <label class="badge badge-light-primary">2</label><a class="sidebar-link sidebar-title" href="#">
-                        <svg class="stroke-icon">
-                        <use href="{{ URL('/assets/svg/icon-sprite.svg#stroke-learning') }}"></use>
-                        </svg><span class="lan-3">Administração</span></a>
-                    <ul class="sidebar-submenu">
-                        <li><a class="lan-1" href="{{route('funcionario.index')}}">Funcionarios</a></li>
-                        <li><a class="lan-2" href="{{route('user.index')}}">Usuarios</a></li>
-                    </ul>
-                </li>
-
-
             @endrole
 
             @role('Admin')
@@ -127,6 +108,13 @@
                         <svg class="stroke-icon">
                         <use href="{{ URL('/assets/svg/icon-sprite.svg#stroke-icons') }}"></use>
                         </svg><span class="lan-3">Valores por Classe</span></a>
+                </li>
+
+                <li class="sidebar-list"><i class="fa fa-thumb-tack"></i>
+                    <label class="badge badge-light-primary">1</label><a class="sidebar-link sidebar-title" href="{{ route('progresso.actividades.index') }}">
+                        <svg class="stroke-icon">
+                        <use href="{{ URL('/assets/svg/icon-sprite.svg#stroke-icons') }}"></use>
+                        </svg><span class="lan-3">Actividades/Servicos</span></a>
                 </li>
 
                 <li class="sidebar-list"><i class="fa fa-thumb-tack"></i>

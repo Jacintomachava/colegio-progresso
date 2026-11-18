@@ -67,6 +67,8 @@ class MatriculaController extends Controller
         $anoAcademicoAtivo = AnoAcademico::where('id', $cicloActivo->ano_academico_id)->first();
         $currentDate = Carbon::now();
 
+        $anos = DB::table('ano_academico')->get();
+
         $alunosMatriculados = null;
         $anoAcademicoProximo = null;
         $anoAcademico = null;
@@ -134,6 +136,7 @@ class MatriculaController extends Controller
             'turmas' => $turmas,
             'alunosSemTurmas' => $alunosSemTurmas,
             'alunosNaoPagouMatriculas' => $alunosNaoPagouMatriculas,
+            'anos' => $anos,
         ]);
     }
 
@@ -967,6 +970,7 @@ class MatriculaController extends Controller
             ->where('id', $escolaId)
             ->first();
 
+
         abort_unless($escola, 404, 'Escola não encontrada.');
 
         /*
@@ -1744,7 +1748,7 @@ class MatriculaController extends Controller
         $current_year = Carbon::now()->year;
         $today = Carbon::now();
 
-        $anoAcademicoAtivo = AnoAcademico::where('ano', 2026)->first(); //AnoAcademico::where('estado', true)->first();
+        $anoAcademicoAtivo = AnoAcademico::where('ano', 2027)->first(); //AnoAcademico::where('estado', true)->first();
         $escola = Escola::where('id', Auth::user()->escola_id)->first();
         /*$matriculados = Matricula::where('ano_academico_id', $anoAcademicoAtivo->id)
                                     ->where('escola_id', Auth::user()->escola_id)

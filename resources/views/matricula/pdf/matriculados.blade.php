@@ -128,19 +128,15 @@
     <table class="table table-bordered" style="font-size: 7pt">
      @foreach($matriculados as $classe => $alunos)
         <tr>
-            <th style="background-color:#808387; color: white;font-size: 10pt " colspan="10"><center>{{$classe}}</center></th>
+            <th style="background-color:#808387; color: white;font-size: 10pt " colspan="6"><center>{{$classe}}</center></th>
         </tr>
         <tr>
             <th>#</th>
             <th>Codigo </th>
             <th>Nome Aluno</th>
-            <th>Enc.</th>
-            <th>referência</th>
+            <th>Matricula</th>
             <th>Tipo</th>
-            <th>Volor </th>
-            <th>Estado</th>
-            <th>Data Pag.</th>
-            <th>Desc.</th>
+            <th>Valor</th>
         </tr>
         @php $orderNumber = 1; @endphp
         @foreach($alunos as $matricula)
@@ -148,7 +144,6 @@
                 <td>{{ $orderNumber }}</td>
                 <td>{{$matricula->aluno->codigo}}</td>
                 <td>{{$matricula->aluno->pessoa->nome}}</td>
-                <td>{{ optional($matricula->aluno->encarregado->first())->telefone }}</td>
                 <td>{{$matricula->referencia}}</td>
                 <td>
                     @if($matricula->renovacao==1)
@@ -158,33 +153,8 @@
                     @endif
                 </td>
                 <td>{{ number_format($matricula->valor_total, 2, ',', '.') }}</td>
-                <td>
-                    @if($matricula->pagamento->pagou==1)
-                        <span style="color:green">Pago ({{$matricula->pagamento->metodo->nome}})</span>
-                    @else
-                        <span style="color:red">Pendente</span>
-                    @endif
-                </td>
-                <td>
-                    @if($matricula->pagamento->pagou==1)
-                        {{ \Carbon\Carbon::parse($matricula->pagamento->data_pagamento)->format('d-M-Y') }}
-                    @else
-                        <span>---</span>
-                    @endif
-                </td>
-                <td>
-                    @if($matricula->pagamento->pagou==1)
-                        @if($matricula->pagamento->tipo==0)
-                            <span>Com Isenção</span>
-                        @elseif($matricula->pagamento->tipo==1)
-                            <span>Com Disconto</span>
-                        @elseif($matricula->pagamento->tipo==2)
-                            <span>Normal</span>
-                        @endif
-                    @else
-                        <span>---</span>
-                    @endif
-                </td>
+
+
 
                 @php $orderNumber++;  @endphp
             </tr>

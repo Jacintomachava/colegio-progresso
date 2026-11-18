@@ -52,7 +52,7 @@ class ProgressoDocumentoNumeroService
             ]);
 
         return sprintf(
-            '%s-%06d-%d',
+            '%s%02d%04d',
             $tipo,
             $numero,
             $ano

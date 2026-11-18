@@ -39,6 +39,8 @@ use App\Http\Controllers\ProgressoPagamentoController;
 use App\Http\Controllers\ProgressoReciboController;
 use App\Http\Controllers\ProgressoFacturaController;
 use App\Http\Controllers\ProgressoValoresClassesController;
+use App\Http\Controllers\ProgressoActividadeController;
+use App\Http\Controllers\ProgressoPrecarioPdfController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -120,6 +122,10 @@ Auth::routes();
 // WhatsApp
 Route::get('/webhook-whatsapp/{codigo}', [WhatsAppController::class, 'store'])->name('webhook.whatsapp');
 Route::get('/listar/reclamacoes', [WhatsAppController::class, 'reclamacoes'])->name('listar.reclamacoes');
+
+Route::get('/progresso/actividades',[ProgressoActividadeController::class, 'index'])->name('progresso.actividades.index');
+Route::post('/progresso/actividades',[ProgressoActividadeController::class, 'store'])->name('progresso.actividades.store');
+Route::put('/progresso/actividades/{id}',[ProgressoActividadeController::class, 'update'])->name('progresso.actividades.update');
 
 // Responder WhatsApp
 Route::post('/reclamacao/responder', [WhatsAppController::class, 'responder'])->name('reclamacao.responder');
@@ -215,6 +221,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/mpesa/matricula/{codigo}', [MatriculaController::class, 'pagamentoMatriculaMpesa'])->name('pagamentoMatriculaMpesa.index');
     Route::post('/pagar/matricula/mpesa', [MatriculaController::class, 'pagarMatriculaMpesa'])->name('pagarMatriculaMpesa.store');
+
+    Route::get('/progresso/precario/pdf',[ProgressoPrecarioPdfController::class, 'gerar'])->name('progresso.precario.pdf');
 
     Route::post('/aluno/mudar-foto', [AlunoController::class, 'mudarFoto']);
 

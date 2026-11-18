@@ -42,12 +42,11 @@
                             <button class="btn btn-pill btn-warning btn-sm">Atribuir Turma</button>
                         </a>
                     @endif
-                        <a href="#" data-bs-toggle="modal" data-bs-target=".bd-example-modal-lg">
-                            <button class="btn btn-pill btn-success btn-sm">Renovar Matricula</button>
+                        
+                        <a href="{{route('progresso.precario.pdf')}}" target="_blank" >
+                            <button class="btn btn-pill btn-secondary btn-sm">Tabela de Preçário</button>
                         </a>
-                        <a href="{{route('atribuir.turma')}}" >
-                            <button class="btn btn-pill btn-warning btn-sm">Atribuir Turma</button>
-                        </a>
+
                         <a href="{{route('relatorio.matriculado')}}" target="_blank" >
                             <button class="btn btn-pill btn-secondary btn-sm">Imprimir</button>
                         </a>
@@ -316,6 +315,28 @@ $(document).ready(function() {
             shouldSort: false,  // Mantém a ordem dos alunos no dropdown
         });
     });
+
+$(document).on('click', '#btnGerarPrecarioPdf', function () {
+
+    const anoId = $('#anoPrecarioPdf').val();
+
+    if (!anoId) {
+        Swal.fire(
+            'Atenção',
+            'Seleccione o ano académico.',
+            'warning'
+        );
+        return;
+    }
+
+    const url = @json(
+        route('progresso.precario.pdf', [
+            'anoAcademicoId' => '__ANO__'
+        ])
+    ).replace('__ANO__', encodeURIComponent(anoId));
+
+    window.open(url, '_blank');
+});
 </script>
 
 @endpush
