@@ -37,11 +37,15 @@ th { background: #eff6f1; text-align: left; font-size: 8px; color: #53645a; }
     $enc = $familia->get('ENCARREGADO');
     $tipo = ($detalhes->tipo_inscricao ?? '') === 'NOVA' ? 'Nova inscrição' : 'Renovação';
 @endphp
+
 <div class="header">
     <div class="photo">
         @if($foto)<img src="{{ $foto }}" alt="Fotografia">@else<br><br><span class="muted">FOTOGRAFIA</span>@endif
     </div>
-    <div class="school">{{ mb_strtoupper($escola->nome ?? 'COLÉGIO PROGRESSO') }}</div>
+ 
+    <div class="school">
+        {{ mb_strtoupper($escola->nome ?? 'COLÉGIO PROGRESSO') }}
+    </div>
     <div class="subtitle">Secretaria • Registo académico</div>
     <div class="doc-title">FICHA DE INSCRIÇÃO / MATRÍCULA</div>
     <div class="tag">Ano lectivo: {{ $show($matricula->ano_lectivo) }}</div>

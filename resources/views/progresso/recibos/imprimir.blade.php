@@ -76,10 +76,11 @@
         <tr>
             <td style="width:55%">
                 <strong>{{ $escola->nome }}</strong>
+                @if(!empty($escola->endereco))<div><strong></strong> {{ $escola->endereco }}</div>@endif
+                @if(!empty($escola->provincia))<div><strong></strong> {{ $escola->provincia }}</div>@endif
                 @if(!empty($escola->nuit))<div><strong>NUIT:</strong> {{ $escola->nuit }}</div>@endif
-                @if(!empty($escola->provincia))<div><strong>Província:</strong> {{ $escola->provincia }}</div>@endif
                 @if(!empty($escola->telefone))<div><strong>Telefone:</strong> {{ $escola->telefone }}</div>@endif
-                @if(!empty($escola->endereco))<div><strong>Endereço:</strong> {{ $escola->endereco }}</div>@endif
+
 
             </td>
             <td>
@@ -91,9 +92,8 @@
     <table class="meta">
         <tr>
             <td><strong>N.º do documento</strong>{{ $recibo->numero }}</td>
-            <td><strong>Data de emissão</strong>{{ \Carbon\Carbon::parse($recibo->data_emissao)->format('d/m/Y') }}</td>
+            <td><strong>Data de emissão</strong>{{ \Carbon\Carbon::parse($recibo->data_emissao)->format('d-m-Y') }}</td>
             <td><strong>Moeda</strong>Meticais (MZN)</td>
-            <td><strong>Estado</strong>{{ $recibo->estado }}</td>
         </tr>
     </table>
 

@@ -77,10 +77,11 @@
         <tr>
             <td style="width:55%">
                 <strong>{{ $escola->nome }}</strong>
+                @if(!empty($escola->endereco))<div><strong></strong> {{ $escola->endereco }}</div>@endif
+                @if(!empty($escola->provincia))<div><strong></strong> {{ $escola->provincia }}</div>@endif
                 @if(!empty($escola->nuit))<div><strong>NUIT:</strong> {{ $escola->nuit }}</div>@endif
-                @if(!empty($escola->provincia))<div><strong>Província:</strong> {{ $escola->provincia }}</div>@endif
                 @if(!empty($escola->telefone))<div><strong>Telefone:</strong> {{ $escola->telefone }}</div>@endif
-                @if(!empty($escola->endereco))<div><strong>Endereço:</strong> {{ $escola->endereco }}</div>@endif
+
             </td>
             <td>
                 <div class="cliente">Exmo. Sr.(a) {{ $aluno->nome ?? ('Aluno #' . $aluno->id) }}</div>
@@ -91,7 +92,7 @@
     <table class="meta">
         <tr>
             <td><strong>N.º do documento</strong>{{ $factura->numero }}</td>
-            <td><strong>Data de emissão</strong>{{ \Carbon\Carbon::parse($dataEmissao)->format('d/m/Y') }}</td>
+            <td><strong>Data de emissão</strong>{{ \Carbon\Carbon::parse($dataEmissao)->format('d-m-Y') }}</td>
             <td><strong>Moeda</strong>Meticais (MZN)</td>
             <td><strong>Estado financeiro</strong>{{ $estadoFinanceiro }}</td>
         </tr>
@@ -131,8 +132,10 @@
         <tr><td>IVA registado</td><td>{{ $moeda($valorIva) }}</td></tr>
         <tr><td>Multa registada</td><td>{{ $moeda($valorMulta) }}</td></tr>
         <tr class="total-final"><td>Total da factura</td><td>{{ $moeda($totalFactura) }}</td></tr>
-        <tr><td>Total pago</td><td>{{ $moeda($totalPago) }}</td></tr>
-        <tr><td>Saldo pendente</td><td>{{ $moeda($saldoPendente) }}</td></tr>
+        @if($moeda($totalPago) > 0)
+          <tr><td>Total pago</td><td>{{ $moeda($totalPago) }}</td></tr>
+          <tr><td>Saldo pendente</td><td>{{ $moeda($saldoPendente) }}</td></tr>
+        @endif
     </table>
 
     <div class="rodape">

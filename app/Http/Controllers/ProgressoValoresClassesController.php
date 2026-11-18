@@ -52,6 +52,11 @@ class ProgressoValoresClassesController extends Controller
     {
         $escolaId = (int) Auth::user()->escola_id;
 
+        /*
+        |--------------------------------------------------------------------------
+        | 1. LOCALIZAR REGISTO
+        |--------------------------------------------------------------------------
+        */
         $registo = DB::table('progresso_valores_classes')
             ->where('id', $id)
             //->where('escola_id', $escolaId)
@@ -60,15 +65,25 @@ class ProgressoValoresClassesController extends Controller
         if (!$registo) {
             return response()->json([
                 'status' => 0,
-                'message' => 'Configuração não encontrada.'
+                'message' => 'Registo não encontrado nesta escola.'
             ], 404);
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | 2. VALIDAR DADOS
+        |--------------------------------------------------------------------------
+        */
         $dados = $this->validar($request, $escolaId);
 
         $this->verificarDuplicado($escolaId, $dados, $id);
 
-        DB::table('progresso_valores_classes')
+        /*
+        |--------------------------------------------------------------------------
+        | 3. ACTUALIZAR CAMPOS PERMITIDOS
+        |--------------------------------------------------------------------------
+        */
+        $afectados = DB::table('progresso_valores_classes')
             ->where('id', $id)
             ->where('escola_id', $escolaId)
             ->update([
@@ -83,16 +98,21 @@ class ProgressoValoresClassesController extends Controller
                 'updated_at' => now(),
             ]);
 
+        /*
+        |--------------------------------------------------------------------------
+        | 4. VERIFICAR RESULTADO
+        |--------------------------------------------------------------------------
+        */
         $actualizado = DB::table('progresso_valores_classes')
             ->where('id', $id)
-            ->where('escola_id', $escolaId)
             ->first();
 
         return response()->json([
             'status' => 1,
-            'message' => 'Actualização processada.',
-            'dados_recebidos' => $dados,
-            'dados_anteriores' => $registo,
+            'message' => 'Operação de actualização executada.',
+            'id_recebido' => $id,
+            'escola_id' => $escolaId,
+            'linhas_afectadas' => $afectados,
             'dados_actuais' => $actualizado,
         ]);
     }

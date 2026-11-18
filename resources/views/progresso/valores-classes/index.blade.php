@@ -46,6 +46,9 @@
 <div class="modal fade" id="modalValores" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content">
         <form id="formValores">
+
+            <input type="hidden" name="id" id="valor_id">
+            
             @csrf
             <div class="modal-header"><h5 class="modal-title" id="tituloModal">Novo Valor</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
             <div class="modal-body">
