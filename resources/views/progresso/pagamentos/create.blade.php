@@ -124,6 +124,50 @@
 
                 <div class="card-body basic-wizard important-validation">
 
+                <ul class="nav nav-tabs mb-4" id="abasPagamento">
+
+                    <li class="nav-item">
+                        <button
+                            type="button"
+                            class="nav-link {{ $facturasPendentes->isNotEmpty() ? 'active' : '' }}"
+                            data-bs-toggle="tab"
+                            data-bs-target="#painel-facturas">
+
+                            Facturas pendentes
+                            <span class="badge bg-danger">
+                                {{ $facturasPendentes->count() }}
+                            </span>
+                        </button>
+                    </li>
+
+                    <li class="nav-item">
+                        <button
+                            type="button"
+                            class="nav-link {{ $facturasPendentes->isEmpty() ? 'active' : '' }}"
+                            data-bs-toggle="tab"
+                            data-bs-target="#painel-novo">
+
+                            <i class="fa fa-plus"></i>
+                            Novo pagamento
+                        </button>
+                    </li>
+
+                </ul>
+
+                <div class="tab-content">
+
+                    <div
+                        class="tab-pane fade {{ $facturasPendentes->isNotEmpty() ? 'show active' : '' }}"
+                        id="painel-facturas">
+
+                        @include('progresso.pagamentos.partials.facturas_pendentes')
+
+                    </div>
+
+                    <div
+                        class="tab-pane fade {{ $facturasPendentes->isEmpty() ? 'show active' : '' }}"
+                        id="painel-novo">
+
                 <form id="formPagamento"
                         action="{{ route('progresso.pagamentos.store') }}"
                         method="POST"
@@ -483,6 +527,8 @@
         </div>
     </div>
 </div>
+
+@include('progresso.pagamentos.partials.modal_pagamento_factura')
 
 @endsection
 
@@ -923,6 +969,384 @@ $(document).ready(function () {
             return false;
         }, true);
     }
+
+});
+
+$(document).on('click', '.btn-pagar-factura', async function () {
+
+    const id = $(this).data('id');
+    const numero = $(this).data('numero');
+    const saldo = Number($(this).data('saldo'));
+
+    $('#modalFacturaId').val(id);
+    $('#modalFacturaNumero').text(numero);
+    $('#modalFacturaSaldo').text(
+        saldo.toLocaleString('pt-PT', {
+            minimumFractionDigits: 2
+        }) + ' MT'
+    );
+
+    $('#modalValorRecebido').val(saldo.toFixed(2));
+    $('#modalFacturaCobrancas').empty();
+
+    try {
+
+        const url = @json(route('progresso.facturas.itens-pagamento', ['facturaId' => '__ID__']))
+            .replace('__ID__', encodeURIComponent(id));
+
+        const resposta = await $.getJSON(url);
+
+        resposta.itens.forEach(function (item) {
+
+            $('#modalFacturaCobrancas').append(
+                $('<input>', {
+                    type: 'hidden',
+                    name: 'cobrancas[]',
+                    value: item.cobranca_id
+                })
+            );
+
+        });
+
+    } catch (erro) {
+
+        Swal.fire(
+            'Erro',
+            'Não foi possível carregar os itens da factura.',
+            'error'
+        );
+
+    }
+});
+
+$(function () {
+
+    const saldoAluno = Number(@json((float) $saldoAluno));
+
+    const urlItens = @json(
+        route('progresso.facturas.itens-pagamento', [
+            'facturaId' => '__ID__'
+        ])
+    );
+
+    let saldoFactura = 0;
+    let itensCarregados = false;
+    let emProcessamento = false;
+    let pagamentoConfirmado = false;
+
+    const dinheiro = valor => Number(valor || 0)
+        .toLocaleString('pt-PT', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }) + ' MT';
+
+    function novaChave() {
+        return window.crypto?.randomUUID
+            ? window.crypto.randomUUID()
+            : null;
+    }
+
+    function actualizarResumoModal() {
+
+        const creditoUtilizado = Math.min(
+            saldoAluno,
+            saldoFactura
+        );
+
+        const necessario = Math.max(
+            0,
+            saldoFactura - creditoUtilizado
+        );
+
+        const recebido = Math.max(
+            0,
+            Number($('#modalValorRecebido').val()) || 0
+        );
+
+        const aplicado = Math.min(
+            saldoFactura,
+            creditoUtilizado + recebido
+        );
+
+        const restante = Math.max(
+            0,
+            saldoFactura - aplicado
+        );
+
+        $('#modalCreditoDisponivel').text(
+            dinheiro(creditoUtilizado)
+        );
+
+        $('#modalValorNecessario').text(
+            dinheiro(necessario)
+        );
+
+        $('#modalValorAplicado').text(
+            dinheiro(aplicado)
+        );
+
+        $('#modalSaldoRestante').text(
+            dinheiro(restante)
+        );
+    }
+
+    $(document).on('click', '.btn-pagar-factura', async function () {
+
+        const facturaId = $(this).attr('data-id');
+        const numero = $(this).attr('data-numero');
+
+        saldoFactura = Number($(this).attr('data-saldo')) || 0;
+
+        itensCarregados = false;
+        pagamentoConfirmado = false;
+
+        const form = $('#formPagamentoFactura')[0];
+        form.reset();
+
+        const chave = novaChave();
+
+        if (!chave) {
+            Swal.fire('Erro', 'Não foi possível gerar a chave de segurança.', 'error');
+            return;
+        }
+
+        $('#modalChaveIdempotencia').val(chave);
+        $('#modalFacturaId').val(facturaId);
+        $('#modalFacturaNumero').text(numero);
+        $('#modalFacturaSaldo').text(dinheiro(saldoFactura));
+
+        $('#modalFacturaCobrancas').empty();
+
+        $('#btnConfirmarFactura')
+            .prop('disabled', true)
+            .text('A carregar factura...');
+
+        const necessario = Math.max(
+            0,
+            saldoFactura - Math.min(saldoAluno, saldoFactura)
+        );
+
+        $('#modalValorRecebido').val(necessario.toFixed(2));
+
+        actualizarResumoModal();
+
+        try {
+
+            const url = urlItens.replace(
+                '__ID__',
+                encodeURIComponent(facturaId)
+            );
+
+            const resposta = await $.ajax({
+                url: url,
+                type: 'GET',
+                dataType: 'json',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (
+                Number(resposta.status) !== 1 ||
+                !Array.isArray(resposta.itens) ||
+                resposta.itens.length === 0
+            ) {
+                throw new Error('Factura sem itens válidos.');
+            }
+
+            resposta.itens.forEach(function (item) {
+
+                $('#modalFacturaCobrancas').append(
+                    $('<input>', {
+                        type: 'hidden',
+                        name: 'cobrancas[]',
+                        value: item.cobranca_id
+                    })
+                );
+            });
+
+            itensCarregados = true;
+
+            $('#btnConfirmarFactura')
+                .prop('disabled', false)
+                .text('Confirmar pagamento');
+
+        } catch (erro) {
+
+            $('#btnConfirmarFactura')
+                .prop('disabled', true)
+                .text('Factura indisponível');
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro',
+                text: erro.responseJSON?.message ||
+                    erro.message ||
+                    'Não foi possível carregar a factura.'
+            });
+        }
+    });
+
+    $('#modalValorRecebido').on('input', actualizarResumoModal);
+
+    $('#formPagamentoFactura').on('submit', async function (evento) {
+
+        evento.preventDefault();
+
+        if (
+            emProcessamento ||
+            pagamentoConfirmado ||
+            !itensCarregados
+        ) {
+            return;
+        }
+
+        const formulario = this;
+
+        const valor = Number($('#modalValorRecebido').val());
+
+        const credito = Math.min(saldoAluno, saldoFactura);
+
+        const necessario = Math.max(0, saldoFactura - credito);
+
+        if (!Number.isFinite(valor) || valor < 0) {
+            Swal.fire('Atenção', 'Informe um valor válido.', 'warning');
+            return;
+        }
+
+        if (valor > necessario + 0.001) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Valor superior ao necessário',
+                text: 'O valor excede o saldo a receber após utilização do crédito.'
+            });
+            return;
+        }
+
+        if (valor <= 0 && credito <= 0) {
+            Swal.fire(
+                'Atenção',
+                'Informe um valor para pagamento.',
+                'warning'
+            );
+            return;
+        }
+
+        if (
+            valor > 0 &&
+            (
+                !$(formulario).find('[name="meios[0][conta_financeira_id]"]').val() ||
+                !$(formulario).find('[name="meios[0][meio]"]').val()
+            )
+        ) {
+            Swal.fire(
+                'Atenção',
+                'Seleccione a conta financeira e o meio de pagamento.',
+                'warning'
+            );
+            return;
+        }
+
+        const confirmacao = await Swal.fire({
+            icon: 'question',
+            title: 'Confirmar pagamento?',
+            html: `
+                <p>Valor recebido: <strong>${dinheiro(valor)}</strong></p>
+                <p>Crédito utilizado: <strong>${dinheiro(credito)}</strong></p>
+                <p>Saldo restante:
+                    <strong>${dinheiro(Math.max(0, saldoFactura - credito - valor))}</strong>
+                </p>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Sim, confirmar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#198754',
+            allowOutsideClick: false
+        });
+
+        if (!confirmacao.isConfirmed) {
+            return;
+        }
+
+        emProcessamento = true;
+
+        const botao = $('#btnConfirmarFactura');
+
+        botao.prop('disabled', true)
+            .text('A processar pagamento...');
+
+        try {
+
+            const resposta = await $.ajax({
+                url: formulario.action,
+                type: 'POST',
+                data: $(formulario).serialize(),
+                dataType: 'json',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (
+                Number(resposta.status) !== 1 ||
+                !resposta.recibo_id ||
+                !resposta.recibo_url
+            ) {
+                throw new Error(
+                    resposta.message ||
+                    'O pagamento não foi confirmado.'
+                );
+            }
+
+            pagamentoConfirmado = true;
+
+            const resultado = await Swal.fire({
+                icon: 'success',
+                title: 'Pagamento confirmado!',
+                text: 'Recibo emitido: ' + (resposta.recibo_numero || ''),
+                showCancelButton: true,
+                confirmButtonText: 'Abrir recibo',
+                cancelButtonText: 'Voltar à listagem',
+                allowOutsideClick: false,
+                allowEscapeKey: false
+            });
+
+            if (resultado.isConfirmed) {
+                window.location.assign(resposta.recibo_url);
+            } else {
+                window.location.reload();
+            }
+
+        } catch (erro) {
+
+            let mensagem = 'Não foi possível confirmar o pagamento.';
+
+            if (erro.responseJSON?.errors) {
+                mensagem = Object.values(
+                    erro.responseJSON.errors
+                ).flat().join('\n');
+            } else if (erro.responseJSON?.message) {
+                mensagem = erro.responseJSON.message;
+            } else if (erro.message) {
+                mensagem = erro.message;
+            }
+
+            await Swal.fire({
+                icon: 'error',
+                title: 'Pagamento não confirmado',
+                text: mensagem
+            });
+
+        } finally {
+
+            emProcessamento = false;
+
+            if (!pagamentoConfirmado) {
+                botao.prop('disabled', false)
+                    .text('Confirmar pagamento');
+            }
+        }
+    });
 
 });
 </script>

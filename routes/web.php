@@ -97,6 +97,7 @@ Route::post('/matriculas', [MatriculaController::class, 'store'])->name('progres
 
 Route::get('/progresso/alunos/{alunoId}/pagamento', [ProgressoPagamentoController::class, 'create'])->name('progresso.pagamentos.create');
 Route::get('/progresso/facturas',[ProgressoFacturaController::class, 'index'])->name('progresso.facturas.index');
+Route::get('/progresso/facturas/{facturaId}/itens-pagamento',[ProgressoPagamentoController::class, 'itensFactura'])->name('progresso.facturas.itens-pagamento');
 
 Route::post('/progresso/pagamentos',[ProgressoPagamentoController::class, 'store'])->name('progresso.pagamentos.store');
 Route::get('/progresso/recibos/{id}/imprimir',[ProgressoReciboController::class, 'imprimir'])->name('progresso.recibos.imprimir');

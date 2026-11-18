@@ -100,8 +100,101 @@ class ProgressoPagamentoService
                 $this->erro('Uma ou mais cobranças são inválidas.');
             }
 
+            /*
+            |--------------------------------------------------------------------------
+            | EMISSÃO AUTOMÁTICA DE FACTURA NO PAGAMENTO DIRECTO
+            |--------------------------------------------------------------------------
+            | Executado dentro da transacção de pagamento.
+            | Só são facturadas cobranças que ainda não possuem factura.
+            |--------------------------------------------------------------------------
+            */
+            $idsSemFactura = [];
+
+            foreach ($cobrancas as $cobranca) {
+
+                if (!in_array($cobranca->estado, ['PENDENTE', 'PARCIAL'], true)) {
+                    $this->erro(
+                        "Cobrança {$cobranca->id} não está disponível."
+                    );
+                }
+
+                if ($cobranca->tipo === 'MULTA') {
+                    $this->erro(
+                        'Liquidação de multas ainda não activada.'
+                    );
+                }
+
+                if ($cobranca->tipo === 'PROPINA') {
+
+                    $simulacao = app(
+                        ProgressoCobrancaMultaService::class
+                    )->simular((int) $cobranca->id);
+
+                    if ($this->centavos($simulacao['multa'] ?? '0') > 0) {
+                        $this->erro(
+                            "Cobrança {$cobranca->id} possui multa pendente de facturação."
+                        );
+                    }
+                }
+
+                $facturaExistente = DB::table('progresso_factura_itens')
+                    ->where('cobranca_id', $cobranca->id)
+                    ->first();
+
+                if ($facturaExistente) {
+
+                    $factura = DB::table('progresso_facturas')
+                        ->where('id', $facturaExistente->factura_id)
+                        ->where('escola_id', $escolaId)
+                        ->where('aluno_id', $aluno->id)
+                        ->first();
+
+                    if (
+                        !$factura ||
+                        !in_array($factura->estado, ['PENDENTE', 'PARCIAL'], true)
+                    ) {
+                        $this->erro(
+                            "Cobrança {$cobranca->id} associada a uma factura inválida ou anulada."
+                        );
+                    }
+
+                    continue;
+                }
+
+                // Não emitir automaticamente uma cobrança já parcialmente paga.
+                if ($cobranca->estado !== 'PENDENTE') {
+                    $this->erro(
+                        "Cobrança {$cobranca->id} parcialmente paga sem factura. Requer reconciliação."
+                    );
+                }
+
+                $idsSemFactura[] = (int) $cobranca->id;
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | EMITIR FACTURA APENAS QUANDO NECESSÁRIO
+            |--------------------------------------------------------------------------
+            */
+            if (!empty($idsSemFactura)) {
+
+                $facturaNova = app(ProgressoFacturaService::class)->emitir(
+                    (int) $aluno->id,
+                    $idsSemFactura,
+                    $escolaId,
+                    'Factura emitida automaticamente no pagamento directo'
+                );
+
+                if (!$facturaNova || empty($facturaNova->id)) {
+                    $this->erro(
+                        'Não foi possível emitir a factura automaticamente.'
+                    );
+                }
+            }
+
             $pendencias = [];
             $facturasIds = [];
+
             foreach ($cobrancas as $cobranca) {
                 if (!in_array($cobranca->estado, ['PENDENTE', 'PARCIAL'], true)) {
                     $this->erro("Cobrança {$cobranca->id} não está disponível.");
@@ -338,5 +431,37 @@ class ProgressoPagamentoService
 
             return DB::table('progresso_pagamentos')->where('id', $pagamentoId)->first();
         }, 3);
+    }
+
+    public function itensFactura(int $facturaId)
+    {
+        $escolaId = (int) auth()->user()->escola_id;
+
+        $factura = DB::table('progresso_facturas')
+            ->where('id', $facturaId)
+            ->where('escola_id', $escolaId)
+            ->whereIn('estado', ['PENDENTE', 'PARCIAL'])
+            ->first();
+
+        if (!$factura) {
+            abort(404, 'Factura não encontrada.');
+        }
+
+        $itens = DB::table('progresso_factura_itens as fi')
+            ->join('progresso_cobrancas as c', 'c.id', '=', 'fi.cobranca_id')
+            ->where('fi.factura_id', $facturaId)
+            ->where('c.escola_id', $escolaId)
+            ->where('c.aluno_id', $factura->aluno_id)
+            ->select(
+                'fi.cobranca_id',
+                'fi.descricao',
+                'fi.valor_total'
+            )
+            ->get();
+
+        return response()->json([
+            'status' => 1,
+            'itens' => $itens
+        ]);
     }
 }

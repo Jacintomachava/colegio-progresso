@@ -29,12 +29,108 @@ class ProgressoPagamentoController extends Controller
             ->where('id', $escolaId)
             ->first();
 
-        $cobrancas = DB::table('progresso_cobrancas')
-            ->where('escola_id', $escolaId)
-            ->where('aluno_id', $alunoId)
-            ->whereIn('estado', ['PENDENTE', 'PARCIAL'])
-            ->orderBy('data_vencimento')
+        /*
+        |--------------------------------------------------------------------------
+        | FACTURAS PENDENTES DO ALUNO
+        |--------------------------------------------------------------------------
+        */
+        $facturasPendentes = DB::table('progresso_facturas as f')
+            ->where('f.escola_id', $escolaId)
+            ->where('f.aluno_id', $alunoId)
+            ->whereIn('f.estado', ['PENDENTE', 'PARCIAL'])
+            ->select('f.*')
+            ->orderBy('f.data_emissao', 'desc')
             ->get();
+
+        foreach ($facturasPendentes as $factura) {
+
+            $valorPago = DB::table('progresso_factura_itens as fi')
+                ->join(
+                    'progresso_pagamento_itens as pi',
+                    'pi.cobranca_id',
+                    '=',
+                    'fi.cobranca_id'
+                )
+                ->join(
+                    'progresso_pagamentos as p',
+                    'p.id',
+                    '=',
+                    'pi.pagamento_id'
+                )
+                ->where('fi.factura_id', $factura->id)
+                ->where('p.escola_id', $escolaId)
+                ->where('p.aluno_id', $alunoId)
+                ->where('p.estado', 'CONFIRMADO')
+                ->sum('pi.valor_aplicado');
+
+            $factura->valor_pago = round((float) $valorPago, 2);
+
+            $factura->saldo_pendente = max(
+                0,
+                round((float) $factura->total - $factura->valor_pago, 2)
+            );
+        }
+
+        // Não mostrar facturas já liquidadas, mesmo que o estado
+        // ainda não tenha sido actualizado.
+        $facturasPendentes = $facturasPendentes->filter(fn ($factura) => $factura->saldo_pendente > 0.001)->values();
+
+        $cobrancasFacturadas = DB::table('progresso_factura_itens as fi')
+            ->join('progresso_facturas as f', 'f.id', '=', 'fi.factura_id')
+            ->join('progresso_cobrancas as c', 'c.id', '=', 'fi.cobranca_id')
+            ->where('f.escola_id', $escolaId)
+            ->where('f.aluno_id', $alunoId)
+            ->whereIn('f.estado', ['PENDENTE', 'PARCIAL'])
+            ->whereIn('c.estado', ['PENDENTE', 'PARCIAL'])
+            ->select(
+                'c.*',
+                'fi.factura_id',
+                'fi.valor_total as valor_facturado'
+            )
+            ->orderBy('c.data_vencimento')
+            ->get();
+
+        foreach ($cobrancasFacturadas as $cobranca) {
+
+            $pago = DB::table('progresso_pagamento_itens as pi')
+                ->join('progresso_pagamentos as p', 'p.id', '=', 'pi.pagamento_id')
+                ->where('pi.cobranca_id', $cobranca->id)
+                ->where('p.estado', 'CONFIRMADO')
+                ->sum('pi.valor_aplicado');
+
+            $cobranca->valor_pago = (float) $pago;
+
+            $cobranca->saldo_principal = max(
+                0,
+                round((float) $cobranca->valor_facturado - (float) $pago, 2)
+            );
+
+            // A factura já foi emitida; não acrescentar multa simulada.
+            $cobranca->multa_simulada = 0;
+        }
+
+        $cobrancasFacturadas = $cobrancasFacturadas
+            ->filter(fn ($c) => $c->saldo_principal > 0.001)
+            ->values();
+
+        $cobrancas = DB::table('progresso_cobrancas as c')
+        ->where('c.escola_id', $escolaId)
+        ->where('c.aluno_id', $alunoId)
+        ->whereIn('c.estado', ['PENDENTE', 'PARCIAL'])
+        ->whereNotExists(function ($query) {
+            $query->selectRaw('1')
+                ->from('progresso_factura_itens as fi')
+                ->join(
+                    'progresso_facturas as f',
+                    'f.id',
+                    '=',
+                    'fi.factura_id'
+                )
+                ->whereColumn('fi.cobranca_id', 'c.id');
+        })
+        ->select('c.*')
+        ->orderBy('c.data_vencimento')
+        ->get();
 
         foreach ($cobrancas as $cobranca) {
 
@@ -80,11 +176,14 @@ class ProgressoPagamentoController extends Controller
             ->get();
 
         return view('progresso.pagamentos.create', compact(
+            'contas',
             'aluno',
             'escola',
             'cobrancas',
+            'facturasPendentes',
             'saldoAluno',
-            'contas'
+            'contas',
+            'cobrancasFacturadas'
         ));
     }
    
@@ -191,13 +290,50 @@ class ProgressoPagamentoController extends Controller
             | 1. VALIDAR COBRANÇAS DO ALUNO
             |--------------------------------------------------------------------------
             */
-
             $cobrancas = DB::table('progresso_cobrancas')
                 ->where('escola_id', $escolaId)
                 ->where('aluno_id', $dados['aluno_id'])
                 ->whereIn('id', $dados['cobrancas'])
                 ->whereIn('estado', ['PENDENTE', 'PARCIAL'])
                 ->get();
+
+            if (!empty($dados['factura_id'])) {
+
+                $factura = DB::table('progresso_facturas')
+                    ->where('id', $dados['factura_id'])
+                    ->where('escola_id', $escolaId)
+                    ->where('aluno_id', $dados['aluno_id'])
+                    ->whereIn('estado', ['PENDENTE', 'PARCIAL'])
+                    ->first();
+
+                if (!$factura) {
+                    throw ValidationException::withMessages([
+                        'factura_id' => ['Factura inválida ou já liquidada.']
+                    ]);
+                }
+
+                $idsFactura = DB::table('progresso_factura_itens')
+                    ->where('factura_id', $factura->id)
+                    ->pluck('cobranca_id')
+                    ->map(fn ($id) => (int) $id)
+                    ->sort()
+                    ->values()
+                    ->all();
+
+                $idsRecebidos = collect($dados['cobrancas'])
+                    ->map(fn ($id) => (int) $id)
+                    ->sort()
+                    ->values()
+                    ->all();
+
+                if ($idsFactura !== $idsRecebidos) {
+                    throw ValidationException::withMessages([
+                        'cobrancas' => [
+                            'As cobranças enviadas não correspondem aos itens da factura.'
+                        ]
+                    ]);
+                }
+            }
 
             if ($cobrancas->count() !== count($dados['cobrancas'])) {
                 throw ValidationException::withMessages([
@@ -212,7 +348,6 @@ class ProgressoPagamentoController extends Controller
             | 2. NORMALIZAR MEIOS DE PAGAMENTO
             |--------------------------------------------------------------------------
             */
-
             $meios = [];
 
             foreach ($dados['meios'] as $meio) {
