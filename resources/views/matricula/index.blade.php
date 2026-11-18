@@ -111,41 +111,29 @@
                                 <td>{{$alunosMatriculado->updated_at->format('d-M-Y')}}</td>
                                 <td>
 
-                                    @if($alunosMatriculado->pagou==0)
-                                        <a class="btn btn-warning btn-xs activate-btn" target="_blank" href="{{route('matricula.facturaPDF',['factura'=>$alunosMatriculado->pagamento->referencia])}}">
-                                             Factura
-                                        </a>
-                                    @endif
+                                    <a href="{{ route('progresso.matriculas.ficha', [
+                                            'alunoId' => $alunosMatriculado->aluno->id
+                                        ]) }}"
+                                    target="_blank"
+                                    rel="noopener"
+                                    class="btn btn-outline-primary">
 
-                                    @if($alunosMatriculado->pagou==1)
-                                        <a class="btn btn-success btn-xs activate-btn" target="_blank" href="{{route('matricula.reciboPDF',['factura'=>$alunosMatriculado->pagamento->referencia])}}">
-                                            Recibo
-                                        </a>
-                                    @else
+                                        <i class="fas fa-file-pdf"></i>
+                                        Ficha do Aluno
 
-                                    @endif
-                                        
-                                       {{--
+                                    </a>
 
-                                        <a class="btn btn-primary btn-xs activate-btn" target="_blank" href="{{route('propina.factura',['alunoCodigo'=>$alunosMatriculado->aluno->codigo])}}" >
-                                            Propinas
-                                        </a>
+                                    <a href="{{ route('progresso.facturas.create', ['alunoId' => $alunosMatriculado->aluno->id]) }}"
+                                       class="btn btn-outline-primary btn-sm">
+                                        <i class="fa fa-file-text-o"></i>
+                                        Gerar Factura
+                                    </a>
+                                    <a href="{{ route('progresso.pagamentos.create', ['alunoId' => $alunosMatriculado->aluno->id]) }}"
+                                        class="btn btn-success btn-xs" >
+                                            <i class="fa fa-money"></i>
+                                            Pagar
 
-                                       --}}
-
-
-                                        <a class="btn btn-secondary btn-xs activate-btn" href="{{route('cocurricular.edit',['alunoCodigo'=>$alunosMatriculado->aluno->codigo])}}" >
-                                            Co-Curr.
-                                        </a>
-                                        <a class="btn btn-warning btn-xs activate-btn" href="{{route('matricula.edit',['codigo'=>$alunosMatriculado->id])}}" >
-                                            Editar
-                                        </a>
-                                        @if($alunosMatriculado->pagou==1)
-                                            <a target="_blank" href="{{route('matricula.reciboPDF',['factura'=>$alunosMatriculado->pagamento->referencia])}}" class="btn btn-success btn-xs" href="#!">PAGO</a>   
-                                        @else
-                                            <a href="{{route('pagamentoMatricula.index',['codigo'=>$alunosMatriculado->id])}}" class="btn btn-danger btn-xs" href="#!">PAGAR</a> 
-                                            {{-- <a href="{{route('pagamentoMatriculaMpesa.index',['codigo'=>$alunosMatriculado->codigo])}}" class="btn btn-danger btn-xs" href="#!">Mpesa</a> --}}
-                                        @endif
+                                    </a> 
 
                                 </td>
                             </tr>

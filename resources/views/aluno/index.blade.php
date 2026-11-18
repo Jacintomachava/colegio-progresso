@@ -40,7 +40,6 @@
                             <th>Genero</th>
                             <th>Classe</th>
                             <th>Estado</th>
-                            <th>Tel. Enc. </th>
                             <th>Acção</th>
                         </tr>
                     </thead>
@@ -62,20 +61,13 @@
                                         <a class="btn btn-success btn-xs" href="#!">Acivo</a>
                                     @endif
                                 </td>
-                                <td>{{ optional($aluno->encarregado->first())->telefone }}</td>
                                 <td>
-                                    <a class="btn btn-primary btn-xs" href="{{route('aluno.show',['codigo'=>$aluno->codigo])}}" >
-                                        Detalhes
-                                    </a>
-                                    <a class="btn btn-warning btn-xs" href="{{route('aluno.edit',['codigo'=>$aluno->codigo])}}" >
-                                        Editar 
-                                    </a>
-                                    <a class="btn btn-danger btn-xs activate-btn" data-id="{{ $aluno->id }}" >
-                                        Remover
-                                    </a>
-                                    <a class="btn btn-warning btn-xs" href="{{route('mudar.telefone',['codigo'=>$aluno->codigo])}}" >
-                                        Mudar Contacto
-                                    </a>
+                                    <a href="{{ route('progresso.pagamentos.create', ['alunoId' => $aluno->id]) }}"
+                                        class="btn btn-success btn-xs" >
+                                            <i class="fa fa-money"></i>
+                                            Pagar
+
+                                    </a> 
                                 </td>
                             </tr>
                         @endforeach

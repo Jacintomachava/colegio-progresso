@@ -61,7 +61,29 @@
                     <label class="badge badge-light-primary">1</label><a class="sidebar-link sidebar-title" href="{{route('aluno.index')}}">
                         <svg class="stroke-icon">
                         <use href="{{ URL('/assets/svg/icon-sprite.svg#stroke-icons') }}"></use>
-                        </svg><span class="lan-3">Alunos</span></a>
+                        </svg><span class="lan-3">Pagamentos</span></a>
+                </li>
+
+                <li class="sidebar-list"><i class="fa fa-thumb-tack"></i>
+                    <label class="badge badge-light-primary">1</label><a class="sidebar-link sidebar-title" href="{{ route('progresso.facturas.index') }}">
+                        <svg class="stroke-icon">
+                        <use href="{{ URL('/assets/svg/icon-sprite.svg#stroke-icons') }}"></use>
+                        </svg><span class="lan-3">Facturas</span></a>
+                </li>
+
+                <li class="sidebar-list"><i class="fa fa-thumb-tack"></i>
+                    <label class="badge badge-light-primary">1</label><a class="sidebar-link sidebar-title" href="{{ route('progresso.recibos.index') }}">
+                        <svg class="stroke-icon">
+                        <use href="{{ URL('/assets/svg/icon-sprite.svg#stroke-icons') }}"></use>
+                        </svg><span class="lan-3">Recibos</span></a>
+                </li>
+
+
+                <li class="sidebar-list"><i class="fa fa-thumb-tack"></i>
+                    <label class="badge badge-light-primary">1</label><a class="sidebar-link sidebar-title" href="{{ route('progresso.valores-classes.index') }}">
+                        <svg class="stroke-icon">
+                        <use href="{{ URL('/assets/svg/icon-sprite.svg#stroke-icons') }}"></use>
+                        </svg><span class="lan-3">Valores por Classe</span></a>
                 </li>
 
                 <li class="sidebar-list"><i class="fa fa-thumb-tack"></i>

@@ -35,6 +35,10 @@ use App\Http\Controllers\TempleteSMSController;
 use App\Http\Controllers\WhatsAppController;
 use App\Http\Controllers\ApiEntidadeReferenciaController;
 use App\Http\Controllers\ProgressoMatriculaController;
+use App\Http\Controllers\ProgressoPagamentoController;
+use App\Http\Controllers\ProgressoReciboController;
+use App\Http\Controllers\ProgressoFacturaController;
+use App\Http\Controllers\ProgressoValoresClassesController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -89,6 +93,19 @@ Route::get('/recibo/propina/{referencia}', [PropinaController::class, 'reciboPro
 Route::get('/ciclo/academico', [MatriculaController::class, 'ciclo'])->name('ciclo.academico');
 Route::post('/ciclo/academico/update', [MatriculaController::class, 'cicloUpdate'])->name('ciclo.ano.store');
 
+Route::post('/matriculas', [MatriculaController::class, 'store'])->name('progresso.matriculas.store');
+
+Route::get('/progresso/alunos/{alunoId}/pagamento', [ProgressoPagamentoController::class, 'create'])->name('progresso.pagamentos.create');
+Route::get('/progresso/facturas',[ProgressoFacturaController::class, 'index'])->name('progresso.facturas.index');
+
+Route::post('/progresso/pagamentos',[ProgressoPagamentoController::class, 'store'])->name('progresso.pagamentos.store');
+Route::get('/progresso/recibos/{id}/imprimir',[ProgressoReciboController::class, 'imprimir'])->name('progresso.recibos.imprimir');
+Route::get('/progresso/recibos',[ProgressoReciboController::class, 'index'])->name('progresso.recibos.index');
+Route::get('/progresso/facturas/{id}/imprimir',[ProgressoFacturaController::class, 'imprimir'])->name('progresso.facturas.imprimir');
+Route::get('/progresso/alunos/{alunoId}/facturas/criar',[ProgressoFacturaController::class, 'create'])->name('progresso.facturas.create');
+Route::post('/progresso/facturas',[ProgressoFacturaController::class, 'store'])->name('progresso.facturas.store');
+Route::get('/alunos/{alunoId}/ficha-matricula',[MatriculaController::class, 'fichaPdf'])->name('progresso.matriculas.ficha');
+
 // Recuperar Senha
 Route::get('/recuperar/senha', [UserController::class, 'recuperarSenhaIndex'])->name('recuperarSenha.index');
 Route::post('/nova/senha', [UserController::class, 'recuperarSenhaTelefone'])->name('recuperarSenha.telefone');
@@ -134,6 +151,13 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/atribuir/turma', [TurmaController::class, 'atribuirTurmaAluno'])->name('atribuirTurma.store');
     Route::get('/editar/turma/{turmaID}', [TurmaController::class, 'edit'])->name('turma.edit');
     Route::post('/update/turma', [TurmaController::class, 'update'])->name('turma.update');
+
+    Route::prefix('progresso/valores-classes')->name('progresso.valores-classes.')->controller(ProgressoValoresClassesController::class)
+    ->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/', 'store')->name('store');
+        Route::put('/{id}', 'update')->name('update');
+    });
 
     // Taxa
     Route::get('/taxa', [TaxaController::class, 'index'])->name('taxa.index');

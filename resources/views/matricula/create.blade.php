@@ -1,1017 +1,457 @@
 @extends('layouts.app')
 
+
+
 @push('css')
 
-<style type="text/css">
+<style>
 
-.area{
-    margin: 10px auto;
-    box-shadow: 0 10px 100px #ccc;
-    padding: 20px;
-    box-sizing: border-box;
-    max-width: 500px;
-}
+.progresso-step{display:none}.progresso-step.active{display:block}
 
-.area video{
-    width: 100%;
-    height: auto;
-    background-color: whitesmoke;
-}
+.progresso-camera{width:100%;max-height:260px;background:#171717;border-radius:8px;object-fit:cover}
 
-.area textarea{
-    width: 100%;
-    margin-top: 10px;
-    height: 80px;
-    box-sizing: border-box;
-}
+.progresso-preview{width:100%;max-height:260px;object-fit:contain;border:1px solid #ddd;border-radius:8px}
 
-.area button{
-    -webkit-appearance: none;
-    width: 100%;
-    box-sizing: border-box;
-    padding: 10px;
-    text-align: center;
-    background-color: #068c84;
-    color: white;
-    text-transform: uppercase;
-    border: 1px solid white;
-    box-shadow: 0 1px 5px #666;
-}
+.progresso-section{border:1px solid #e5e7eb;border-radius:8px;padding:16px;margin-bottom:15px}
 
-.area button:focus{
-    outline: none;
-    background-color: #0989b0;
-}
+.progresso-step .is-invalid{border-color:#dc3545}.progresso-step .invalid-feedback{display:block}.progresso-section h5{margin-bottom:15px}.progresso-nav .btn{margin-right:6px;margin-bottom:6px}
 
-.area img{
-    max-width: 100%;
-    height: 400px;
-}
-
-.area .caminho-imagem{
-    padding: 5px 10px;
-    border-radius: 3px;
-    background-color: #068c84;
-    text-align: center;
-}
-
-.area .caminho-imagem a{
-    color: white;
-    text-decoration: none;
-}
-
-.area .caminho-imagem a:hover{
-    color: yellow;
-}
 </style>
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
 
 @endpush
 
+
+
 @section('conteudo')
 
+<div class="container-fluid">
 
-    <h2>
-        <div class="col-12">
-          <div class="error" id="error" style="color: red; text-align: center">
-          </div>
-        </div>
-    </h2>
+ <div class="card height-equal title-line">
 
-    <div class="container-fluid">
-        <div class="row">
-          <div class="col-xl-12">
-            <div class="card height-equal title-line">
-              <div class="card-header">
-                <h2>Matricular Aluno</h2>
-              </div>
-              <div class="card-body basic-wizard important-validation">
-                <div class="stepper-horizontal custom-scrollbar" id="stepper1">
-                  <div class="stepper-one stepper step editing active">
-                    <div class="step-circle"><span>1</span></div>
-                    <div class="step-title">Dados do Aluno</div>
-                    <div class="step-bar-left"></div>
-                    <div class="step-bar-right"></div>
-                  </div>
-                  <div class="stepper-two step">
-                    <div class="step-circle"><span>2</span></div>
-                    <div class="step-title">Pessoa(s) a Contactar</div>
-                    <div class="step-bar-left"></div>
-                    <div class="step-bar-right"></div>
-                  </div>
-                  <div class="stepper-three step">
-                    <div class="step-circle"><span>3</span></div>
-                    <div class="step-title">Plano Educativo Individualizado</div>
-                    <div class="step-bar-left"></div>
-                    <div class="step-bar-right"></div>
-                  </div>
-                  <div class="stepper-four step">
-                    <div class="step-circle"><span>4</span></div>
-                    <div class="step-title">Saúde</div>
-                    <div class="step-bar-left"></div>
-                    <div class="step-bar-right"></div>
-                  </div>
-                </div>
-                <div id="msform1">
-                  <form class="row g-3 needs-validation custom-input" id="msform" enctype="multipart/form-data">
+  <div class="card-header"><h3>Matrícula — Colégio Progresso</h3><p class="text-muted mb-2">Ficha de inscrição 2027</p>
 
-                    @csrf
-                    
-                    <form1 class="stepper-one row g-3 needs-validation custom-input" >
+   <div class="alert alert-light border mb-0" id="resumoValores" aria-live="polite">
 
-                      <div class="col-4">
-                        <br>
-                        <label class="form-label" for="email-basic-wizard">Nome de Aluno<span class="txt-danger">*</span></label>
-                        <input class="form-control"  type="text" name="nomealuno" placeholder="Nome de Aluno">
-                        <label class="form-label" for="email-basic-wizard">Nome de Casa</label>
-                        <input class="form-control"  type="text" name="nome_casa" placeholder="Nome de Casa do Aluno">
-                        <label class="form-label" for="passwordwizard">Genero<span class="txt-danger">*</span></label>
-                          <select class="form-select"  name="genero">
-                                <option value="">Seleciona o Genero</option>
-                                <option value="Masculino">Masculino</option>
-                                <option value="Femenino">Femenino</option>
-                          </select>
-                        <label class="form-label" for="firstnamewizard">Data de Nascimento<span class="txt-danger">*</span></label>
-                        <input class="form-control"  type="date" name="data_nascimento" placeholder="Data de Nascimento">
+    <div class="row g-2"><div class="col-md-3"><small>Matrícula</small><div class="fw-bold" id="valorMatricula">—</div></div>
 
-                        <div class="col-12">
-                         <label class="form-label" for="passwordwizard">Provincia<span class="txt-danger">*</span></label>
-                           <select class="form-select"  name="provincia">
-                              <option value="">Escolhe a Provincia...</option>
-                              @foreach($provincias as $provincia)
-                                <option value="{{$provincia->id}}">{{$provincia->nome}}</option>
-                              @endforeach
-                           </select>
-                        </div>
+    <div class="col-md-3"><small>Actividades mensais</small><div class="fw-bold" id="valorActividades">0,00 MT</div></div>
 
-                      </div>
+    <div class="col-md-3"><small>Mensalidade curricular</small><div class="fw-bold" id="valorPropina">—</div></div>
 
-                      <div class="col-4">
-                          <div class="area">
-                              <button type="button" id="capture">Tirar foto</button>
-                              <center>
-                                  <video id="video" style="width: 100%; height: 40%;"></video>
-                              </center>  
-                                      
-                          </div> 
-                      </div>
-                      <div class="col-4">
-                            <div class="area" >
-                                <button type="button" id="capture2">Pre-Visualizar</button>
-                                <center>
-                                <canvas id="canvas" style="width: 100%; height: 40%;" >Pré-visualização</canvas> 
-                                </center>        
-                            </div>
-                      </div>
+    <div class="col-md-3"><small>Total inicial estimado</small><div class="fw-bold text-primary" id="valorTotal">—</div></div></div>
 
+    <small class="text-muted">Total inicial = matrícula + primeira propina + primeiro mês das actividades, antes de eventuais regras de vencimento. O valor definitivo será calculado no servidor.</small>
 
+   </div></div>
 
+  <div class="card-body">
 
+   <div class="progresso-nav mb-3" id="progressoNav">
 
-                      <div class="col-4">
-                        <label class="form-label" for="passwordwizard">Tipo Documento<span class="txt-danger">*</span></label>
-                          <select class="form-select"  name="tipo_documento">
-                                <option value="">Seleciona o tipo de Documento</option>
-                                <option value="B.I">B.I</option>
-                                <option value="Cédula">Cédula</option>
-                                <option value="Boletim de Nascimento">Boletim de Nascimento</option>
-                                <option value="Passaporte">Passaporte</option>
-                          </select>
-                      </div>
+    <button type="button" class="btn btn-primary btn-sm" data-go="0">1. Aluno e fotografia</button>
 
-                      <div class="col-4">
-                        <label class="form-label" for="confirmpasswordwizard">Número Documento</label>
-                        <input class="form-control"  type="text" name="numero_documento" placeholder="Número Documento" >
-                      </div>
+    <button type="button" class="btn btn-outline-primary btn-sm" data-go="1">2. Família</button>
 
-                      <div class="col-4">
-                        <label class="form-label" for="confirmpasswordwizard">Endereço/Bairro<span class="txt-danger">*</span></label>
-                        <input class="form-control"  type="text" name="endereco" placeholder="Endereço/Bairro" >
-                      </div>
+    <button type="button" class="btn btn-outline-primary btn-sm" data-go="2">3. Saúde e segurança</button>
 
-                      <div class="col-4">
-                        <label class="form-label" for="passwordwizard">Classe<span class="txt-danger">*</span></label>
-                          <select class="form-select"  name="classe" id="classe" onchange="getTurmas()">
-                              <option value="">Escolhe a Classe...</option>
-                              @foreach($classes as $classe)
-                                <option value="{{$classe->id}}">{{$classe->nome}}</option>
-                              @endforeach
+    <button type="button" class="btn btn-outline-primary btn-sm" data-go="3">4. Actividades e confirmação</button>
 
-                          </select>
-                      </div>
+   </div>
 
-                      <div class="col-4">
-                        <label class="form-label" for="confirmpasswordwizard">Desconto (em MT)<span class="txt-danger">*</span></label>
-                        <input class="form-control"  type="text" name="desconto" value="0" placeholder="Endereço/Bairro" style="background-color: #f5f5f5; color: #555;" >
-                      </div>
+   <div id="progressoErros" class="alert alert-danger d-none"></div>
 
-                      <div class="col-4">
-                        <label class="form-label" for="passwordwizard">Regime<span class="txt-danger">*</span></label>
-                          <select class="form-select"  name="turma" id="turma">
-                              <option value="">Escolhe o Regime...</option>
-                          </select>
-                      </div>
+   <form id="msform" novalidate method="POST" action="{{ route('progresso.matriculas.store') }}" enctype="multipart/form-data">
 
-                      <div class="col-4">
-                        <label class="form-label" for="passwordwizard">P. E. Individualizado<span class="txt-danger">*</span></label>
-                          <select class="form-select"  name="plano" id="plano" onchange="mostrarPlano()">
-                              <option value="">Escolha o plano de estudo</option>
-                              <option value="1">Plano Normal</option>
-                              <option value="2">Plano Gold</option>
-                          </select>
-                      </div>
+    @csrf
 
-                      <div class="form-group col-4">
-                          <label for="contactos" class="form-label">{{ __('Alunos Irmãos') }} </label>
-                          <select class="form-select contactos" name="alunos[]"  multiple="multiple" >
-                              @foreach ($alunos as $aluno)
-                                  <option value="{{ $aluno->id }}"
-                                      {{ in_array($aluno->id, old('alunos', [])) ? 'selected' : '' }}>
-                                      {{ $aluno->pessoa->nome }} ({{ $aluno->codigo }})
-                                  </option>
-                              @endforeach
-                          </select>
-                      </div>
+    <section class="progresso-step active" data-step="0">
 
-                      <div class="form-group col-4">
-                          <label for="contactos" class="form-label">{{ __('Disciplina Co-Curriculares') }} </label>
-                          <select class="form-select contactos1" name="cocurriculares[]"  multiple="multiple" >
-                              @foreach ($disciplinas as $disciplina)
-                                  <option value="{{ $disciplina->id }}"
-                                      {{ in_array($disciplina->id, old('cocurriculares', [])) ? 'selected' : '' }}>
-                                      {{ $disciplina->nome }} 
-                                  </option>
-                              @endforeach
-                          </select>
-                      </div>
+     <div class="progresso-section"><h5>Dados do aluno</h5><div class="row g-3">
 
-                    </form1>
+      <div class="col-md-12"><label class="form-label">Nome completo *</label><input name="nomealuno" class="form-control" required value="{{ old('nomealuno') }}"></div>
 
-                    <form1 class="stepper-two row g-3 needs-validation custom-input">
-                        <div id="relacoes-container">
-                            <div class="relacao-item">
-                                <div class="row border rounded-3" style="padding: 20pt">
-                                    <div class="col-sm-4">
-                                        <label class="form-label" for="nome">Nome de Médico</label>
-                                        <input class="form-control" type="text" name="nomemedico" placeholder="Nome Médico">
-                                    </div>
-                                    <div class="col-sm-4">
-                                        <label class="form-label" for="nome">Morada de Médico </label>
-                                        <input class="form-control" type="text" name="moradamedico" placeholder="Morada Médico">
-                                    </div>
-                                    <div class="col-4" hidden>
-                                        <label class="form-label" for="grau">Grau de Parentesco </label>
-                                        <select class="form-select" name="grau">
-                                            <option value="Medico">Médico</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-sm-4">
-                                        <label class="form-label" for="telefone">Telefone </label>
-                                        <input class="form-control" type="text" name="telefonemedico" placeholder="Telefone">
-                                    </div>
-                                    <div class="col-sm-4">
-                                        <label class="form-label" for="email">Email </label>
-                                        <input class="form-control" type="text" name="emailmedico" placeholder="Email">
-                                    </div>
-                                    <div class="col-sm-4">
-                                        <label class="form-label" for="nome">Nome Consultório </label>
-                                        <input class="form-control" type="text" name="consultor" placeholder="Nome de Consultório">
-                                    </div>
+      <div class="col-md-4"><label class="form-label">Género *</label><select name="genero" class="form-select" required><option value="">Seleccione</option><option value="Masculino">Masculino</option><option value="Femenino">Feminino</option></select></div>
 
-                                </div>
-                            </div>
-                            <br>
-                        </div>
-                        <div class="row border rounded-3" style="padding: 20pt">
-                            <div class="col-sm-6">
-                                <button type="button" class="btn btn-success btn-sm" id="add-relacao">+ Adicionar Nova Relação</button>
-                            </div>
-                            <div class="col-sm-6">
-                                <button type="button" class="btn btn-warning btn-sm" id="add-relacao-existe">+ Adicionar Relação Existente</button>
-                            </div> 
-                        </div>
-                    </form1>
+      <div class="col-md-4"><label class="form-label">Nascimento *</label><input type="date" name="data_nascimento" class="form-control" required></div>
 
-                    <form1 class="stepper-two row g-3 needs-validation custom-input">
-                        <!-- Divs específicas -->
-                        <div id="planoNormal" style="display: none; margin-top: 10px;">
-                          <div class="d-grid gap-2 buttons-box">
-                            <button class="btn btn-light-primary" type="button">Foi Selecionado O Plano de Estudo Normal</button>
-                          </div>
-                        </div>
-                        <div id="planoGold" style="display: none; margin-top: 10px;">
-                         <div class="row">
+      <div class="col-md-4"><label class="form-label">Nacionalidade</label><select name="nacionalidade" class="form-select">
 
-                         <div class="row border rounded-3" style="padding: 8pt; margin-left: 8pt; background-color: #f2eeed ">   
-                          <div class="col-sm-6">
-                            <label class="form-label" for="firstnamewizard">Motivo de Plano educativo individualizado</label>
-                            <input class="form-control"  type="text" name="motivo_plano_individualizado" placeholder="Motivo de Plano educativo individualizado">
-                          </div>
+      @foreach(($nacionalidades ?? []) as $nacionalidade)
 
-                          <div class="col-sm-6">
-                            <label class="form-label" for="firstnamewizard">Indicações especiais a ter em conta</label>
-                            <input class="form-control"  type="text" name="indicacoes_especiais" placeholder="Indicações especiais a ter em conta">
-                          </div>
+       <option value="{{ $nacionalidade->nome }}" {{ old('nacionalidade', 'Moçambicana') === $nacionalidade->nome ? 'selected' : '' }}>{{ $nacionalidade->nome }}</option>
 
-                          <div class="col-3">
-                            <label class="form-label" for="passwordwizard">diagnóstico Autismo?</label>
-                            <select class="form-select"  name="autismo">
-                                <option value="Não">Não</option>
-                                <option value="Sim">Sim</option>
-                            </select>
-                          </div>
+      @endforeach
 
-                          <div class="col-3">
-                            <label class="form-label" for="passwordwizard">diagnóstico Dislexia?</label>
-                            <select class="form-select"  name="dislexia">
-                                <option value="Não">Não</option>
-                                <option value="Sim">Sim</option>
-                            </select>
-                          </div>
+     </select><small class="text-muted">Por defeito: Moçambicana.</small></div>
 
-                          <div class="col-3">
-                            <label class="form-label" for="passwordwizard">diagnóstico Hiperactividade?</label>
-                            <select class="form-select"  name="hiperactividade">
-                                <option value="Não">Não</option>
-                                <option value="Sim">Sim</option>
-                            </select>
-                          </div>
+      <div class="col-md-4"><label class="form-label">Província *</label><select name="provincia" class="form-select" required><option value="">Seleccione</option>@foreach(($provincias ?? []) as $provincia)<option value="{{ $provincia->id }}">{{ $provincia->nome }}</option>@endforeach</select></div>
 
-                          <div class="col-3">
-                            <label class="form-label" for="passwordwizard">Outras condições?</label>
-                            <select class="form-select"  name="outras_condicoes">
-                                <option value="Não">Não</option>
-                                <option value="Sim">Sim</option>
-                            </select>
-                          </div>
+      <div class="col-md-4"><label class="form-label">Classe pretendida *</label><select name="classe" id="classe" class="form-select" required><option value="">Seleccione</option>@foreach(($classes ?? []) as $classe)<option value="{{ $classe->id }}">{{ $classe->nome }}</option>@endforeach</select><small class="text-muted">A turma será atribuída posteriormente.</small></div>
 
-                          <div class="col-sm-12">
-                            <label class="form-label" for="firstnamewizard">Especifique (Outras condições)</label>
-                            <input class="form-control"  type="text" name="especifica_outras_condicoes" placeholder="Especifique (Outras condições)">
-                          </div>
-                         </div>
+      <div class="col-md-4"><label class="form-label">Tipo de documento</label><select name="tipo_documento" class="form-select"><option value="">Seleccione</option><option value="B.I">B.I</option><option value="Cédula">Cédula</option><option value="Boletim de Nascimento">Boletim de Nascimento</option><option value="Passaporte">Passaporte</option></select></div>
 
-                         <div class="row border rounded-3" style="padding: 8pt; margin-left: 8pt;margin-top: 14pt; background-color: #a3d2f7 "> 
-                          <div class="col-3">
-                            <label class="form-label" for="passwordwizard">Comunicação Verbal</label>
-                            <select class="form-select"  name="comunicacao_verbal">
-                                <option value="Não">Não</option>
-                                <option value="Sim">Sim</option>
-                            </select>
-                          </div>
+      <div class="col-md-4"><label class="form-label">Número do documento</label><input name="numero_documento" class="form-control"></div>
 
-                          <div class="col-3">
-                            <label class="form-label" for="passwordwizard">Jargão</label>
-                            <select class="form-select"  name="jargao">
-                                <option value="Não">Não</option>
-                                <option value="Sim">Sim</option>
-                            </select>
-                          </div>
+      <div class="col-md-4"><label class="form-label">Data de emissão</label><input type="date" name="data_emissao" class="form-control"></div>
 
-                          <div class="col-3">
-                            <label class="form-label" for="passwordwizard">Ecolálias</label>
-                            <select class="form-select"  name="ecolalia">
-                                <option value="Não">Não</option>
-                                <option value="Sim">Sim</option>
-                            </select>
-                          </div>
+      <div class="col-md-6"><label class="form-label">Residência / bairro *</label><input name="endereco" class="form-control" required></div>
 
-                          <div class="col-3">
-                            <label class="form-label" for="passwordwizard">Otorrino</label>
-                            <select class="form-select"  name="otorrino">
-                                <option value="Não">Não</option>
-                                <option value="Sim">Sim</option>
-                            </select>
-                          </div>
+      <div class="col-md-3"><label class="form-label">Escola anterior</label><input name="escola_anterior" class="form-control"></div>
 
-                          <div class="col-sm-12">
-                            <label class="form-label" for="firstnamewizard">Notas especiais</label>
-                            <input class="form-control"  type="text" name="notas_especiais" placeholder="Notas especiais">
-                          </div>
-                        </div>
+      <div class="col-md-3"><label class="form-label">Com quem vive a criança</label><input name="vive_com" class="form-control"></div>
 
-                        <div class="row border rounded-3" style="padding: 8pt; margin-left: 8pt;margin-top: 14pt; background-color: #f1affa "> 
-                          <div class="col-3">
-                            <label class="form-label" for="passwordwizard">tolerância ao barrulho</label>
-                            <select class="form-select"  name="barrulho">
-                                <option value="Não">Não</option>
-                                <option value="Sim">Sim</option>
-                            </select>
-                          </div>
+     </div></div>
 
-                          <div class="col-3">
-                            <label class="form-label" for="passwordwizard">hipersencibilidade</label>
-                            <select class="form-select"  name="hipersencibilidade">
-                                <option value="Não">Não</option>
-                                <option value="Sim">Sim</option>
-                            </select>
-                          </div>
+     <div class="progresso-section"><h5>Fotografia do aluno</h5><div class="row g-3">
 
-                          <div class="col-3">
-                            <label class="form-label" for="passwordwizard">alguma estereotipia</label>
-                            <select class="form-select"  name="estereotipia">
-                                <option value="Não">Não</option>
-                                <option value="Sim">Sim</option>
-                            </select>
-                          </div>
+      <div class="col-md-6"><video id="video" class="progresso-camera" autoplay playsinline muted></video><div class="mt-2 d-flex flex-wrap gap-2"><button type="button" id="iniciarCamera" class="btn btn-outline-primary">Activar câmara</button><button type="button" id="capture" class="btn btn-primary">Tirar foto</button><button type="button" id="pararCamera" class="btn btn-outline-secondary">Desligar câmara</button></div></div>
 
-                          <div class="col-sm-3">
-                            <label class="form-label" for="firstnamewizard">Se sim, especifique</label>
-                            <input class="form-control"  type="text" name="estereotpia_especifique" placeholder="Motivo de Plano educativo individualizado">
-                          </div>
+      <div class="col-md-6"><canvas id="canvas" class="d-none"></canvas><img id="fotoPreview" class="progresso-preview d-none" alt="Pré-visualização da fotografia"><div class="mt-2"><label for="fotoFicheiro" class="form-label">Ou escolher fotografia do computador</label><input id="fotoFicheiro" type="file" accept="image/jpeg,image/png,image/webp" class="form-control"><small class="text-muted">A imagem escolhida substitui a fotografia capturada.</small></div></div>
 
-                        </div>
+     </div><input type="hidden" id="imagem" name="imagem"><div id="cameraAviso" class="small text-muted mt-2">A câmara só será activada quando clicar no botão. Requer HTTPS ou localhost.</div></div>
 
-                        </div>
-                      </div>
-                  </form1>
+    </section>
 
-                    <form1 class="stepper-three row g-3 needs-validation custom-input" >
-                      
-                      <div class="col-sm-3">
-                        <label class="form-label" for="firstnamewizard">Nome do Centro de Saúde</label>
-                        <input class="form-control"  type="text" name="nomecentrosaude" placeholder="Nome do Centro de Saúde">
-                      </div>
+    <section class="progresso-step" data-step="1"><div class="row g-3">
 
-                      <div class="col-3">
-                         <label class="form-label" for="passwordwizard">Sofre de Alguma Doenca?</label>
-                         <select class="form-select"  name="algumadoenca">
-                            <option value="Não">Não</option>
-                            <option value="Sim">Sim</option>
-                         </select>
-                      </div>
+     @foreach(['pai'=>'Pai','mae'=>'Mãe','encarregado'=>'Encarregado de educação'] as $key=>$label)
 
-                      <div class="col-sm-3">
-                        <label class="form-label" for="firstnamewizard">Qual</label>
-                        <input class="form-control"  type="text" name="qual" placeholder="Qual">
-                      </div>
+     <div class="col-12"><div class="progresso-section"><h5>{{ $label }} {{ $key === 'encarregado' ? '*' : '(opcional)' }}</h5><div class="row g-3">
 
-                      <div class="col-sm-3">
-                        <label class="form-label" for="firstnamewizard">Indicações especiais</label>
-                        <input class="form-control"  type="text" name="indicacaoespecial" placeholder="Indicações especiais a ter em conta">
-                      </div>
+      <div class="col-md-6"><label class="form-label">Nome {{ $label }}</label><input name="familia[{{ $key }}][nome]" class="form-control" {{ $key === 'encarregado' ? 'required' : '' }}></div>
 
-                      <div class="col-3">
-                         <label class="form-label" for="passwordwizard">Já teve Sarampo</label>
-                         <select class="form-select"  name="sarampo">
-                            <option value="Não">Não</option>
-                            <option value="Sim">Sim</option>
-                         </select>
-                      </div>
+      @if($key === 'encarregado')
 
-                      <div class="col-3">
-                         <label class="form-label" for="passwordwizard">Já teve Varicela?</label>
-                         <select class="form-select"  name="varicela">
-                            <option value="Não">Não</option>
-                            <option value="Sim">Sim</option>
-                         </select>
-                      </div>
+      <div class="col-md-3"><label class="form-label">Parentesco</label><select name="familia[encarregado][parentesco]" class="form-select"><option value="">Seleccione</option><option value="Pai">Pai</option><option value="Mãe">Mãe</option><option value="Avô/Avó">Avô/Avó</option><option value="Tio/Tia">Tio/Tia</option><option value="Tutor">Tutor</option><option value="Outro">Outro</option></select></div>
 
-                      <div class="col-3">
-                         <label class="form-label" for="passwordwizard">Já teve Papeira?</label>
-                         <select class="form-select"  name="papeira">
-                            <option value="Não">Não</option>
-                            <option value="Sim">Sim</option>
-                         </select>
-                      </div>
+      @endif
 
-                      <div class="col-3">
-                         <label class="form-label" for="passwordwizard">Outras</label>
-                         <select class="form-select"  name="outrasdoencas">
-                            <option value="Não">Não</option>
-                            <option value="Sim">Sim</option>
-                         </select>
-                      </div>
+      <div class="col-md-3"><label class="form-label">Nacionalidade</label><input name="familia[{{ $key }}][nacionalidade]" class="form-control"></div>
 
-                      <div class="col-sm-3">
-                        <label class="form-label" for="firstnamewizard">Especifique</label>
-                        <input class="form-control"  type="text" name="especificaoutras" placeholder="Especifique">
-                      </div>
+      <div class="col-md-4"><label class="form-label">Formação académica</label><input name="familia[{{ $key }}][formacao]" class="form-control"></div>
 
-                      <div class="col-3">
-                         <label class="form-label" for="passwordwizard">Algum tipo de alergias?</label>
-                         <select class="form-select"  name="alergia">
-                            <option value="Não">Não</option>
-                            <option value="Sim">Sim</option>
-                         </select>
-                      </div>
+      <div class="col-md-4"><label class="form-label">Profissão</label><input name="familia[{{ $key }}][profissao]" class="form-control"></div>
 
-                      <div class="col-sm-3">
-                        <label class="form-label" for="firstnamewizard">Especifique</label>
-                        <input class="form-control"  type="text" name="especificaalergia" placeholder="Especifique">
-                      </div>
+      <div class="col-md-4"><label class="form-label">Local de trabalho</label><input name="familia[{{ $key }}][local_trabalho]" class="form-control"></div>
 
-                      <div class="col-3">
-                         <label class="form-label" for="passwordwizard">Alguma restrições alimentar?</label>
-                         <select class="form-select"  name="restricaoalimentar">
-                            <option value="Não">Não</option>
-                            <option value="Sim">Sim</option>
-                         </select>
-                      </div>
+      <div class="col-md-3"><label class="form-label">Telefone</label><input name="familia[{{ $key }}][telefone]" class="form-control" {{ $key === 'encarregado' ? 'required' : '' }}></div>
 
-                      <div class="col-sm-6">
-                        <label class="form-label" for="firstnamewizard">Especifique Restrições alimentar</label>
-                        <input class="form-control"  type="text" name="especifiquerestricaoalimentar" placeholder="Especifique">
-                      </div>
+      <div class="col-md-3"><label class="form-label">Telefone alternativo</label><input name="familia[{{ $key }}][telefone2]" class="form-control"></div>
 
+      <div class="col-md-3"><label class="form-label">Email</label><input type="email" name="familia[{{ $key }}][email]" class="form-control"></div>
 
-                      <button id="botao_salvar" type="submit" class="btn btn-success w-100">
-                          <span id="botao_texto">{{__('Matricular Aluno')}}</span>
-                          <i id="icon_enviar" class="ri-arrow-right-line label-icon align-middle fs-16 ms-2"></i>
-                      </button>
-                    </form1>
-                    
-                   </form>  
-                  </div>
-                  <br>
-                  <div class="wizard-footer d-flex gap-2 justify-content-end">
-                    <button class="btn btn-light-primary" id="backbtn" onclick="backStep()"> Voltar</button>
-                    <button class="btn btn-primary" id="nextbtn" onclick="nextStep()">Próximo</button>
-                  </div>
-              </div>
-            </div>
-          </div>
+      <div class="col-md-3"><label class="form-label">Residência</label><input name="familia[{{ $key }}][residencia]" class="form-control" {{ $key === 'encarregado' ? 'required' : '' }}></div>
 
-          <!--  Colocar escondindo -->
-          <div class="col-xl-6" hidden>
-            <div class="card height-equal title-line">
-              <div class="card-header">
-                <h2>Student Validation Form</h2>
-                <p class="f-m-light mt-1">
-                    Please make sure fill all the filed before click on next button.</p>
-              </div>
-              <div class="card-body custom-input">
-                <form class="form-wizard" >
-                  <div class="tab">
-                    <div class="row g-3">
-                      <div class="col-sm-6">
-                        <label for="name">Name</label>
-                        <input class="form-control" name="name" type="text" placeholder="Enter your name" >
-                      </div>
-                      <div class="col-sm-6">
-                        <label class="form-label" for="student-email-wizard">Email<span class="txt-danger">*</span></label>
-                        <input class="form-control" name="email" type="email"  placeholder="johan@gmail.com">
-                      </div>
-                      <div class="col-12">
-                        <label class="form-label" for="password-wizard">Password<span class="txt-danger">*</span></label>
-                        <input class="form-control" id="password-wizard" type="password" placeholder="Enter password" required="">
-                      </div>
-                      <div class="col-12">
-                        <label class="form-label" for="confirmpassowrd">Confirm Password<span class="txt-danger">*</span></label>
-                        <input class="form-control" id="confirmpassowrd" type="password" placeholder="Enter confirm password" required="">
-                      </div>
-                    </div>
-                  </div>
-                  <div class="tab">
-                    <div class="row g-3 avatar-upload">
-                      <div class="col-12">
-                        <div>
-                          <div class="avatar-edit">
-                            <input id="imageUpload" type="file" accept=".png, .jpg, .jpeg">
-                            <label for="imageUpload"></label>
-                          </div>
-                          <div class="avatar-preview">
-                            <div id="image"></div>
-                          </div>
-                        </div>
-                        <h6>Add Profile</h6>
-                      </div>
-                      <div class="col-12">
-                        <label class="form-label" for="exampleFormControlInput1">Portfolio URL</label>
-                        <input class="form-control" id="exampleFormControlInput1" type="url" placeholder="https://yuri">
-                      </div>
-                      <div class="col-12"> 
-                        <label class="form-label" for="projectDescription">Project Description</label>
-                        <textarea class="form-control" id="projectDescription" rows="2"></textarea>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="tab">
-                    <h5 class="mb-2">Social Links </h5>
-                    <div class="row g-3">
-                      <div class="col-sm-6">
-                        <label class="form-label" for="twitterControlInput">Twitter</label>
-                        <input class="form-control" id="twitterControlInput" type="url" placeholder="https://twitter.com">
-                      </div>
-                      <div class="col-sm-6">
-                        <label class="form-label" for="githubControlInput">Github</label>
-                        <input class="form-control" id="githubControlInput" type="url" placeholder="https:/github.com">
-                      </div>
-                      <div class="col-12"> 
-                        <div class="input-group">
-                          <input class="form-control" id="inputGroupFile04" type="file" aria-describedby="inputGroupFileAddon04" aria-label="Upload">
-                          <button class="btn btn-outline-secondary" id="inputGroupFileAddon04" type="button">Submit</button>
-                        </div>
-                      </div>
-                      <div class="col-12">
-                        <select class="form-select" aria-label="Default select example">
-                          <option selected="">Positions</option>
-                          <option value="1">Web Designer</option>
-                          <option value="2">Software Engineer</option>
-                          <option value="3">UI/UX Designer </option>
-                          <option value="3">Web Developer</option>
-                        </select>
-                      </div>
-                      <div class="col-12"> 
-                        <label class="form-label" for="quationsTextarea">Why do you want to take this position?</label>
-                        <textarea class="form-control" id="quationsTextarea" rows="2"></textarea>
-                      </div>
-                    </div>
-                  </div>
-                  <div>
-                    <div class="text-end pt-3">
-                      <button class="btn btn-secondary" id="prevBtn" type="button" onclick="nextPrev(-1)">Previous</button>
-                      <button class="btn btn-primary" id="nextBtn" type="button" onclick="nextPrev(1)">Next</button>
-                    </div>
-                  </div>
-                  <!-- Circles which indicates the steps of the form:-->
-                  <div class="text-center"><span class="step"></span><span class="step"></span><span class="step"></span><span class="step"></span></div>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
+     </div></div></div>
+
+     @endforeach
+
+    </div></section>
+
+    <section class="progresso-step" data-step="2"><div class="progresso-section"><h5>Saúde</h5><div class="row g-3">
+
+     @foreach(['condicao'=>'Tem alguma condição de saúde/necessidade de acompanhamento?','medicacao'=>'Toma medicação regularmente?','alergia'=>'Tem alergias ou restrição alimentar?'] as $key=>$label)
+
+     <div class="col-md-4"><label class="form-label">{{ $label }}</label><select name="saude[{{ $key }}]" class="form-select"><option value="0">Não</option><option value="1">Sim</option></select><label class="form-label mt-2">Especificar nome do medicamento/frequência</label> Especificar especifique os alimentos ou substâncias a evitar <textarea name="saude[{{ $key }}_descricao]" class="form-control" rows="2"></textarea></div>
+
+     @endforeach
+
+     <div class="col-md-4"><label class="form-label">Atestado médico apresentado?</label><select name="saude[atestado]" class="form-select"><option value="0">Não</option><option value="1">Sim</option></select></div>
+
+     <div class="col-md-8"><label class="form-label">Unidade de saúde preferencial em caso de emergência</label><input name="saude[unidade_preferencial]" class="form-control"></div>
+
+    </div></div><div class="progresso-section"><h5>Emergência e pessoas autorizadas a recolher o aluno</h5><div class="row g-3">
+
+     <div class="col-md-6"><label class="form-label">Contacto de emergência — nome</label><input name="emergencia_nome" class="form-control" required></div>
+
+     <div class="col-md-6"><label class="form-label">Contacto de emergência — telefone</label><input name="emergencia_telefone" class="form-control" required></div>
+
+     @for($i=0;$i<2;$i++)
+
+     <div class="col-md-6"><label class="form-label">Pessoa autorizada {{ $i+1 }} — nome</label><input name="autorizados[{{ $i }}][nome]" class="form-control"></div>
+
+     <div class="col-md-6"><label class="form-label">Pessoa autorizada {{ $i+1 }} — telefone</label><input name="autorizados[{{ $i }}][telefone]" class="form-control"></div>
+
+     @endfor
+
+    </div></div></section>
+
+    <section class="progresso-step" data-step="3"><div class="progresso-section"><h5>Pagamento e actividades opcionais</h5><div class="row g-3">
+
+     <div class="col-md-6"><label class="form-label">Modalidade de pagamento *</label><select name="modalidade_pagamento" class="form-select" required><option value="MENSAL">Mensal</option><option value="TRES_PRESTACOES">Três prestações</option><option value="ANUAL">Anual</option></select></div>
+
+     <div class="col-md-6"><label class="form-label">Bolsa de estudo</label><select name="bolsa_percentual" id="bolsaPercentual" class="form-select"><option value="0">Sem bolsa</option><option value="50">Bolsa 50%</option><option value="100">Bolsa 100%</option></select><small class="text-muted">A bolsa será aplicada às propinas curriculares, não à matrícula ou às actividades, salvo configuração futura.</small></div>
+
+     <div class="col-12"><p class="mb-2">Serviços e aulas extras (opcionais). Valores mensais configurados na base de dados.</p>
+
+      <div class="row g-2">
+
+       @forelse(($atividades ?? []) as $atividade)
+
+       <div class="col-md-6"><label class="border rounded p-3 d-block"><input type="checkbox" name="atividades[]" value="{{ $atividade->id }}" data-valor="{{ $atividade->valor_mensal }}" class="form-check-input me-2 actividade-check">{{ $atividade->nome }} — {{ $atividade->tipo }} <span class="text-muted">({{ number_format($atividade->valor_mensal,2,',','.') }} MT/mês)</span></label></div>
+
+       @empty
+
+       <div class="col-12"><div class="alert alert-warning">Não existem actividades disponíveis. Confirme o carregamento de $atividades no Controller.</div></div>
+
+       @endforelse
+
       </div>
+
+     </div>
+
+     <div class="col-12"><div class="alert alert-info">Ao guardar, a matrícula e a respectiva cobrança são registadas. A factura será emitida posteriormente pela secretaria.</div></div>
+
+    </div></div></section>
+
+    <div class="d-flex justify-content-between mt-3"><button type="button" id="backbtn" class="btn btn-outline-secondary" disabled>Voltar</button><div><button type="button" id="nextbtn" class="btn btn-primary">Próximo</button><button type="submit" id="botao_salvar" class="btn btn-success d-none">Matricular</button></div></div>
+
+   </form>
+
+  </div>
+
+ </div>
+
+</div>
 
 @endsection
 
 
+
 @push('js')
 
-<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
 
 <script>
-    $(document).ready(function() {
-        $('.contactos').select2({
-            placeholder: "{{ __('Seleciona Alunos Irmãos') }}",
-            allowClear: true
-        });
-    });
-    $(document).ready(function() {
-        $('.contactos1').select2({
-            placeholder: "{{ __('Seleciona Actividades Co-Curricular') }}",
-            allowClear: true
-        });
-    });
 
-    $(document).ready(function() {
-        $('.contactos2').select2({
-            placeholder: "{{ __('Seleciona Relacao Pessoa com Aluno') }}",
-            allowClear: true
-        });
-    });
+// Requer jQuery e jquery.validate carregados antes deste bloco.
 
-</script>
+$(function(){
 
-<script>
-    // Botão para adicionar uma nova relação
-    document.getElementById('add-relacao').addEventListener('click', function () {
-    
-    const container = document.getElementById('relacoes-container');
-    const count = container.querySelectorAll('.relacao-item').length;
+ const form=$('#msform');
 
-    const r = Math.floor(Math.random() * 127) + 128;
-    const g = Math.floor(Math.random() * 127) + 128;
-    const b = Math.floor(Math.random() * 127) + 128;
-    const cor = `rgb(${r}, ${g}, ${b})`;
+ if(!$.fn.validate){console.error('Falta carregar jquery.validate.min.js');return;}
 
-    const newItem = document.createElement('div');
-    newItem.classList.add('relacao-item');
-    newItem.innerHTML = `
-        <br>
-        <div class="row border rounded-3" style="padding: 20pt; background-color: ${cor}">
-            <div class="col-sm-4">
-                <label class="form-label" for="nome_${count}">Nome <span class="txt-danger">*</span></label>
-                <input class="form-control" type="text" name="pessoas[${count}][nome]" id="nome_${count}" placeholder="Nome" >
-            </div>
-            <div class="col-4">
-                <label class="form-label" for="grau_${count}">Grau de Parentesco <span class="txt-danger">*</span></label>
-                <select class="form-select" name="pessoas[${count}][grau]" id="grau_${count}" >
-                  <option value="">Selecione</option>
-                  <option value="pai">Pai</option>
-                  <option value="mae">Mãe</option>
-                  <option value="avo">Avô(ó)</option>
-                  <option value="tio">Tio(a)</option>
-                  <option value="padrasto">Padrasto</option>
-                  <option value="madrasta">Madrasta</option>
-                  <option value="outro">Outro</option>
-                </select>
-            </div>
-            <div class="col-sm-4">
-                <label class="form-label" for="telefone_${count}">Telefone <span class="txt-danger">*</span></label>
-                <input class="form-control" type="text" name="pessoas[${count}][telefone]" id="telefone_${count}" placeholder="Telefone">
-            </div>
-            <div class="col-sm-4">
-                <label class="form-label" for="email_${count}">Email </label>
-                <input class="form-control" type="email" name="pessoas[${count}][email]" id="email_${count}" placeholder="Email">
-            </div>
-            <div class="form-group col-6">
-                <label class="form-label">Relação Aluno: <span class="txt-danger">*</span></label>
-                <div class="relacoes">
-                    ${generateRelacoes(count)}
-                </div>
-            </div>
-            <div class="col-sm-2">
-                <label class="form-label">. <span class="txt-danger">*</span></label>
-                <button class="form-control btn-danger remove-relacao" type="button">Remover</button>
-            </div>
-        </div>
-    `;
+ $.validator.addMethod('telefoneMZ', function(value, element) { return this.optional(element) || /^(?:\+?258)?[0-9]{9}$/.test(value.replace(/\s+/g, '')); }, 'Informe um telefone válido de 9 dígitos (ou +258).');
 
-    container.appendChild(newItem);
+ form.validate({
 
-    // Configurar botão de remover
-    newItem.querySelector('.remove-relacao').addEventListener('click', function () {
-        newItem.remove();
-    });
+  ignore: [],
+
+  onsubmit: false,
+
+  errorElement:'div',errorClass:'invalid-feedback',
+
+  highlight:function(el){$(el).addClass('is-invalid');},
+
+  unhighlight:function(el){$(el).removeClass('is-invalid');},
+
+  errorPlacement:function(error,element){error.insertAfter(element);},
+
+  rules:{
+
+   nomealuno:{required:true,minlength:3},genero:{required:true},data_nascimento:{required:true},
+
+   provincia:{required:true},classe:{required:true},endereco:{required:true,minlength:3},
+
+   'familia[encarregado][nome]':{required:true,minlength:3},
+
+   'familia[encarregado][telefone]':{required:true,telefoneMZ:true},
+
+   'familia[encarregado][residencia]':{required:true,minlength:3},
+
+   emergencia_nome:{required:true,minlength:3},emergencia_telefone:{required:true,telefoneMZ:true}
+
+  },
+
+  messages:{required:'Este campo é obrigatório.',nomealuno:{required:'Informe o nome do aluno.'}}
+
+ });
+
 });
 
-// Gera os checkboxes de relações
-function generateRelacoes(count) {
-    return @json($relacoes).map(relacao => `
-        <div class="form-check form-check-inline">
-            <input type="checkbox" class="form-check-input" name="pessoas[${count}][relacoes][]" value="${relacao.id}" id="relacao_${count}_${relacao.id}">
-            <label for="relacao_${count}_${relacao.id}" class="form-check-label" style="color: black">${relacao.nome}</label>
-        </div>
-    `).join('');
-}
+(function(){
+
+ 'use strict';
+
+ const form=document.getElementById('msform');
+
+ const steps=[...document.querySelectorAll('.progresso-step')];
+
+ const nav=[...document.querySelectorAll('#progressoNav [data-go]')];
+
+ const back=document.getElementById('backbtn'), next=document.getElementById('nextbtn'), save=document.getElementById('botao_salvar');
+
+ const video=document.getElementById('video'), canvas=document.getElementById('canvas'), preview=document.getElementById('fotoPreview');
+
+ const imagem=document.getElementById('imagem'), ficheiro=document.getElementById('fotoFicheiro'), aviso=document.getElementById('cameraAviso');
+
+ let current=0, stream=null;
+ let enviando=false, matriculaRegistada=false;
+
+ const tabelaValores=@json($valoresClasses ?? []);
+
+ const moeda=v=>new Intl.NumberFormat('pt-MZ',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v)+' MT';
+
+ function actualizarValores(){
+
+   const classeId=Number(document.getElementById('classe').value);
+
+   const config=tabelaValores.find(v=>Number(v.classe_id)===classeId);
+
+   const bolsa=Number(document.getElementById('bolsaPercentual').value)||0;
+
+   const extras=[...document.querySelectorAll('.actividade-check:checked')].reduce((a,e)=>a+(Number(e.dataset.valor)||0),0);
+
+   const matricula=config?Number(config.valor_matricula):null;
+
+   const propina=config?Number(config.valor_propina)*(1-bolsa/100):null;
+
+   document.getElementById('valorMatricula').textContent=matricula===null?'Configure a classe':moeda(matricula);
+
+   document.getElementById('valorPropina').textContent=propina===null?'—':moeda(propina);
+
+   document.getElementById('valorActividades').textContent=moeda(extras);
+
+   document.getElementById('valorTotal').textContent=matricula===null?'—':moeda(matricula+propina+extras);
+
+ }
+
+ document.getElementById('classe').addEventListener('change',actualizarValores);
+
+ document.getElementById('bolsaPercentual').addEventListener('change',actualizarValores);
+
+ document.querySelectorAll('.actividade-check').forEach(el=>el.addEventListener('change',actualizarValores));
+
+ actualizarValores();
 
 
-    // Botão para adicionar relação existente
-    document.getElementById('add-relacao-existe').addEventListener('click', function () {
-        const container = document.getElementById('relacoes-container');
-        const count = container.querySelectorAll('.relacao-item').length;
 
-        const r = Math.floor(Math.random() * 127) + 128;
-        const g = Math.floor(Math.random() * 127) + 128;
-        const b = Math.floor(Math.random() * 127) + 128;
-        const cor = `rgb(${r}, ${g}, ${b})`;
+ function showStep(n){current=n;steps.forEach((s,i)=>s.classList.toggle('active',i===n));nav.forEach((b,i)=>{b.classList.toggle('btn-primary',i===n);b.classList.toggle('btn-outline-primary',i!==n)});back.disabled=n===0;next.classList.toggle('d-none',n===steps.length-1);save.classList.toggle('d-none',n!==steps.length-1);}
 
-        const newItem = document.createElement('div');
-        newItem.classList.add('relacao-item');
-        newItem.innerHTML = `
-            <br>
-            <div class="row border rounded-3" style="padding: 20pt; background-color: ${cor}">
-                <div class="col-6">
-                    <label class="form-label" for="aluno">Aluno <span class="txt-danger">*</span></label>
-                    <select class="form-select" name="pessoa[${count}][existente]">
-                        <option value="">Seleciona a Pessoa</option>
-                        @foreach($pesssoasExistentes as $pesssoaExiste)
-                        <option value="{{ $pesssoaExiste->id }}">{{ $pesssoaExiste->pessoa->nome }} - {{ $pesssoaExiste->relacao->nome }} de {{ $pesssoaExiste->aluno->pessoa->nome }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-sm-6">
-                    <label class="form-label" for="grau">Grau de Parentesco <span class="txt-danger">*</span></label>
-                    <select class="form-select" name="pessoas[${count}][grau]">
-                        <option value="Pai">Pai</option>
-                        <option value="Mae">Mãe</option>
-                        <option value="Vizinha">Vizinho</option>
-                    </select>
-                </div>
-                <div class="form-group col-6">
-                    <label class="form-label">Relação Aluno: <span class="txt-danger">*</span></label>
-                    <div class="relacoes">
-                        ${generateRelacoes(count)}
-                    </div>
-                </div>
-                <div class="col-sm-6">
-                    <label class="form-label" for="remover">. <span class="txt-danger">*</span></label>
-                    <button class="form-control btn-danger remove-relacao" type="button">Remover</button>
-                </div>
-            </div>
-        `;
+ function validateStep(n){
 
-        container.appendChild(newItem);
+   const $step=$(steps[n]);
 
-        // Configurar botão de remover
-        newItem.querySelector('.remove-relacao').addEventListener('click', function () {
-            newItem.remove();
-        });
-    });
-</script>
+   if(!$.fn.validate){alert('jQuery Validate não foi carregado.');return false;}
 
+   let valido=true, primeiro=null;
 
-<script>
+   $step.find(':input').not(':button,:submit,:hidden').each(function(){
 
-$(document).ready(function() {
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    });
+     if(!$(this).valid()){valido=false;if(!primeiro)primeiro=this;}
 
-    $("#msform").validate({
-        // Adicionar regras para cada campo
-        rules: {
-            plano: {
-                required: true
-            },
-            turma: {
-                required: true
-            },
-            classe: {
-                required: true
-            },
-            endereco: {
-                required: true,
-                minlength: 2,
-            },
-            numero_documento: {
-                required: true
-            },
-            tipo_documento: {
-                required: true
-            },
-            provincia: {
-                required: true
-            },
-            data_nascimento: {
-                required: true,
-            },
-            genero: {
-                required: true
-            },
-            nome_casa: {
-                minlength: 3,
-            },
-            nomealuno: {
-                required: true,
-                minlength: 3,
-            },
-            imagem: {
-                required: true
-            }
-       
-     },
-        submitHandler: function(form) {
-            $.ajax({
-                type: "POST",
-                url: "{{route('matricula.store')}}",
-                data: $(form).serialize(), // Corrigido para usar `form` em vez de `this`
+   });
 
-                beforeSend: function () {
-                    // Desabilita o botão de envio e altera o ícone para mostrar que está autenticando
-                    $('#botao_salvar').attr('disabled', true);
-                    $('#icon_enviar').removeClass('ri-arrow-right-line').addClass('spinner-border ri-loader-2-line');
-                    $('#botao_texto').text('Matriculando Aluno...');
-                },
+   if(primeiro){primeiro.focus();}
 
-                success: function(response) {
-                    // Habilita o botão e retorna o ícone original
-                    $('#botao_salvar').attr('disabled', false);
-                    $('#icon_enviar').removeClass('spinner-border ri-loader-2-line').addClass('ri-arrow-right-line');
-                    $('#botao_texto').text('Matricular Aluno');
+   return valido;
 
-                    // Redireciona ou exibe uma mensagem de erro com base na resposta
-                    if(response.status == 1) {
+ }
 
-                            Swal.fire({
-                                      icon: 'success',
-                                      title: 'Sucesso!',
-                                      text: response.message,
-                            });
+ back.addEventListener('click',()=>showStep(Math.max(0,current-1)));
 
-                            window.location.reload();
+ next.addEventListener('click',()=>{if(validateStep(current))showStep(Math.min(steps.length-1,current+1))});
 
-                            } else if(response.status == 0) {
+ nav.forEach(b=>b.addEventListener('click',()=>{const target=Number(b.dataset.go);if(target<=current){showStep(target);return}for(let i=current;i<target;i++){if(!validateStep(i)){showStep(i);return}}showStep(target)}));
 
-                            Swal.fire({
-                                  icon: 'error',
-                                  title: 'Erro!',
-                                  text: response.message,
-                            });
-                    }
+ async function startCamera(){if(!navigator.mediaDevices?.getUserMedia){aviso.textContent='Câmara indisponível. Use HTTPS/localhost ou escolha uma fotografia.';return}try{stopCamera();stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});video.srcObject=stream;await video.play();aviso.textContent='Câmara activa. Clique em Tirar foto.'}catch(e){aviso.textContent='Não foi possível activar a câmara. Verifique a permissão ou escolha uma fotografia.'}}
 
-                },
-                error: function(errors) {
-                    // Habilita o botão e retorna o ícone original em caso de erro
-                    $('#botao_salvar').attr('disabled', false);
-                    $('#icon_enviar').removeClass('spinner-border ri-loader-2-line').addClass('ri-arrow-right-line');
-                    $('#botao_texto').text('Matricular Aluno');
+ function stopCamera(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}video.srcObject=null}
 
-                    // Exibe a mensagem de erro
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Erro!',
-                        text: errors.responseJSON.message,
-                    });
+ document.getElementById('iniciarCamera').addEventListener('click',startCamera);
 
-                }
-            });
-        }
-    });
-});
+ document.getElementById('pararCamera').addEventListener('click',stopCamera);
 
-</script>
+ document.getElementById('capture').addEventListener('click',()=>{if(!stream||!video.videoWidth){aviso.textContent='Active a câmara antes de tirar a fotografia.';return}const w=Math.min(video.videoWidth,1000),h=Math.round(video.videoHeight*w/video.videoWidth);canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(video,0,0,w,h);imagem.value=canvas.toDataURL('image/jpeg',0.82);ficheiro.value='';preview.src=imagem.value;preview.classList.remove('d-none');aviso.textContent='Fotografia capturada com sucesso.';stopCamera()});
 
-<script type="text/javascript">
-     
-     navigator.mediaDevices.getUserMedia({
-           video: true
-         })
- 
-         .then(function (stream) {
-           
-           var video = document.querySelector('#video');
-           
-           video.srcObject = stream;
-           
-           video.play();
-         })
- 
- 
-         document.querySelector('#capture').addEventListener('click', function () {
-            const canvas = document.querySelector("#canvas");
-            const video = document.querySelector("#video");
+ ficheiro.addEventListener('change',()=>{const file=ficheiro.files[0];if(!file)return;if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>5*1024*1024){ficheiro.value='';aviso.textContent='Escolha JPG, PNG ou WEBP com até 5 MB.';return}imagem.value='';const reader=new FileReader();reader.onload=()=>{preview.src=reader.result;preview.classList.remove('d-none')};reader.readAsDataURL(file);stopCamera()});
 
-            // Ajustar tamanho do canvas para o vídeo
-            canvas.height = video.videoHeight;
-            canvas.width = video.videoWidth;
+ window.addEventListener('pagehide',stopCamera);
 
-            const context = canvas.getContext('2d');
-            context.drawImage(video, 0, 0);
+ form.addEventListener('submit', async function(e) {
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  if (enviando || matriculaRegistada) return;
 
-            // Converter para base64
-            const base64Image = canvas.toDataURL('image/png');
-
-            // Enviar a imagem para o servidor via AJAX ou salvar no formulário
-            $('<input>').attr({
-                type: 'hidden',
-                name: 'imagem',
-                value: base64Image
-            }).appendTo('#msform');
-
-        });
-
-        function b64ToUint8Array(b64Image) {
-             var img = atob(b64Image.split(',')[1]);
-             var img_buffer = [];
-             var i = 0;
-             while (i < img.length) {
-                 img_buffer.push(img.charCodeAt(i));
-                 i++;
-             }
-             return new Uint8Array(img_buffer);
-        }
- 
-</script>
-
-<script>
-    function getTurmas() {
-        const classeId = document.getElementById('classe').value;
-        const escolaId = @json(Auth::user()->escola_id);
-        const turmaSelect = document.getElementById('turma');
-
-        if (!classeId) {
-            turmaSelect.innerHTML = '<option value="">Escolhe o Regime...</option>';
-            return;
-        }
-
-        // Requisição AJAX para obter as turmas
-        fetch(`/api/turma/${classeId}/${escolaId}`)
-            .then(response => response.json())
-            .then(data => {
-                turmaSelect.innerHTML = '<option value="">Escolhe o Regime...</option>';
-                data.forEach(turma => {
-                    turmaSelect.innerHTML += `<option value="${turma.id}">${turma.nome} - ${turma.periodo.detalhe}</option>`;
-                });
-            })
-            .catch(error => {
-                console.error('Erro ao carregar turmas:', error);
-                turmaSelect.innerHTML = '<option value="">Erro ao carregar turmas</option>';
-            });
+  for (let i = 0; i < steps.length; i++) {
+    if (!validateStep(i)) {
+      showStep(i);
+      return;
     }
-</script>
+  }
 
-<script>
-function mostrarPlano() {
-    // Capturar o valor selecionado
-    const plano = document.getElementById("plano").value;
+  enviando = true;
+  const erros = document.getElementById('progressoErros');
+  erros.classList.add('d-none');
+  save.disabled = true;
+  save.textContent = 'A registar...';
 
-    // Referenciar as divs
-    const planoNormalDiv = document.getElementById("planoNormal");
-    const planoGoldDiv = document.getElementById("planoGold");
+  try {
+    const payload = new FormData(form);
+    if (ficheiro.files.length) {
+      payload.delete('imagem');
+      payload.append('foto', ficheiro.files[0]);
+    }
 
-    // Mostrar ou ocultar as divs com base no valor selecionado
-    if (plano === "1") {
-        planoNormalDiv.style.display = "block";
-        planoGoldDiv.style.display = "none";
-    } else if (plano === "2") {
-        planoGoldDiv.style.display = "block";
-        planoNormalDiv.style.display = "none";
+    const response = await fetch(form.action, {
+      method: 'POST',
+      body: payload,
+      headers: {
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    });
+
+    const result = await response.json();
+    if (!response.ok || result.status !== 1) {
+      const mensagem = result.errors
+        ? Object.values(result.errors).flat().join('\n')
+        : (result.message || 'Erro ao registar a matrícula.');
+      throw new Error(mensagem);
+    }
+
+    matriculaRegistada = true;
+    const confirmacao = window.Swal
+      ? await Swal.fire({
+          icon: 'success',
+          title: 'Matrícula registada!',
+          text: result.message,
+          showCancelButton: true,
+          confirmButtonText: 'Emitir Factura',
+          cancelButtonText: 'Mais tarde',
+          allowOutsideClick: false
+        })
+      : { isConfirmed: confirm('Matrícula registada. Emitir factura?') };
+
+    if (confirmacao.isConfirmed && result.factura_url) {
+      window.location.href = result.factura_url;
+    } else if (result.redirect) {
+      window.location.href = result.redirect;
     } else {
-        // Esconder ambas as divs caso nenhuma opção válida esteja selecionada
-        planoNormalDiv.style.display = "none";
-        planoGoldDiv.style.display = "none";
+      window.location.reload();
     }
-}
+  } catch (err) {
+    erros.textContent = err.message;
+    erros.classList.remove('d-none');
+    if (window.Swal) {
+      await Swal.fire({
+        icon: 'error',
+        title: 'Não foi possível guardar',
+        text: err.message
+      });
+    }
+  } finally {
+    enviando = false;
+    if (!matriculaRegistada) {
+      save.disabled = false;
+      save.textContent = 'Matricular';
+    }
+  }
+}, {capture: true});
+
+})();
+
 </script>
-
-
 
 @endpush
-
