@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Carbon\Carbon;
 
 class ProgressoReciboService
 {
@@ -36,6 +37,7 @@ class ProgressoReciboService
             ]);
         }
 
+        // Evitar emissão duplicada.
         $existente = DB::table('progresso_recibos')
             ->where('pagamento_id', $pagamentoId)
             ->first();
@@ -44,14 +46,24 @@ class ProgressoReciboService
             return $existente;
         }
 
-        $ano = \Carbon\Carbon::parse(
+        $ano = Carbon::parse(
             $pagamento->confirmado_em
         )->year;
 
         $escolaId = (int) $pagamento->escola_id;
 
-        // Garante que a sequência RC existe.
-        // A chave primária composta impede duplicações.
+        /*
+        |--------------------------------------------------------------------------
+        | NUMERAÇÃO DO RECIBO
+        |--------------------------------------------------------------------------
+        | Mantemos a sequência RC já existente.
+        | Apenas alteramos a apresentação para RT.
+        |
+        | Exemplo:
+        | RC-000007-2026 -> próximo RT260008
+        |--------------------------------------------------------------------------
+        */
+
         DB::table('progresso_documento_sequencias')
             ->insertOrIgnore([
                 'escola_id' => $escolaId,
@@ -75,11 +87,24 @@ class ProgressoReciboService
 
         $proximo = (int) $sequencia->ultimo + 1;
 
+        // Novo formato: RT260008
         $numero = sprintf(
-            'RC-%06d-%d',
-            $proximo,
-            $ano
+            'RC%02d%04d',
+            $ano % 100,
+            $proximo
         );
+
+        // Verificação adicional contra duplicações.
+        $numeroExistente = DB::table('progresso_recibos')
+            ->where('escola_id', $escolaId)
+            ->where('numero', $numero)
+            ->exists();
+
+        if ($numeroExistente) {
+            throw new \RuntimeException(
+                "O número de recibo {$numero} já existe."
+            );
+        }
 
         DB::table('progresso_documento_sequencias')
             ->where('escola_id', $escolaId)
@@ -89,9 +114,12 @@ class ProgressoReciboService
                 'ultimo' => $proximo,
             ]);
 
-        // Valor efectivamente liquidado:
-        // meios recebidos - troco + crédito utilizado.
-        // O crédito gerado permanece no saldo do aluno.
+        /*
+        |--------------------------------------------------------------------------
+        | VALOR DO RECIBO
+        |--------------------------------------------------------------------------
+        */
+
         $valor = round(
             (float) $pagamento->valor_recebido
             - (float) $pagamento->valor_troco
@@ -100,15 +128,26 @@ class ProgressoReciboService
             2
         );
 
+        /*
+        |--------------------------------------------------------------------------
+        | REGISTAR RECIBO
+        |--------------------------------------------------------------------------
+        */
+
         $reciboId = DB::table('progresso_recibos')
             ->insertGetId([
                 'escola_id' => $escolaId,
                 'pagamento_id' => $pagamentoId,
                 'numero' => $numero,
-                'data_emissao' => \Carbon\Carbon::parse(
+                'data_emissao' => Carbon::parse(
                     $pagamento->confirmado_em
                 )->toDateString(),
-                'valor' => number_format($valor, 2, '.', ''),
+                'valor' => number_format(
+                    $valor,
+                    2,
+                    '.',
+                    ''
+                ),
                 'estado' => 'EMITIDO',
                 'user_id' => $pagamento->user_id,
                 'created_at' => now(),

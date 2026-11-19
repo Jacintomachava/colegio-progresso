@@ -38,6 +38,8 @@ class DashbordController extends Controller
         $saldoSMS = SaldoSMS::where('codigo', 'saldo')->first();
         $mensagem = Mensagem::whereYear('created_at', Carbon::now()->year)->count();
 
+        $alunosInscritos= Matricula::where('ano_academico_id', $anoAcademicoAtivo->id)->count();
+
         // Grafico de Barras de Mensalidade
         $meses = Meses::orderBy('id')->get();
 
@@ -127,6 +129,7 @@ class DashbordController extends Controller
             // Matriculas Pagas vs Pendentes
             'numeroMatriculaPendentes' => $numeroMatriculaPendentes,
             'numeroMatriculaPagas' => $numeroMatriculaPagas,
+            'alunosInscritos' => $alunosInscritos,
         ]);
     }
 

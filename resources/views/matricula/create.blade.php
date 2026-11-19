@@ -68,7 +68,7 @@
 
      <div class="progresso-section"><h5>Dados do aluno</h5><div class="row g-3">
 
-      <div class="col-md-12"><label class="form-label">Nome completo *</label><input name="nomealuno" class="form-control" required value="{{ old('nomealuno') }}"></div>
+      <div class="col-md-4"><label class="form-label">Nome completo *</label><input name="nomealuno" class="form-control" required value="{{ old('nomealuno') }}"></div>
 
       <div class="col-md-4"><label class="form-label">Género *</label><select name="genero" class="form-select" required><option value="">Seleccione</option><option value="Masculino">Masculino</option><option value="Femenino">Feminino</option></select></div>
 
@@ -78,7 +78,7 @@
 
       @foreach(($nacionalidades ?? []) as $nacionalidade)
 
-       <option value="{{ $nacionalidade->nome }}" {{ old('nacionalidade', 'Moçambicana') === $nacionalidade->nome ? 'selected' : '' }}>{{ $nacionalidade->nome }}</option>
+       <option value="{{ $nacionalidade->nome }}" @selected(old('nacionalidade', 'Moçambique') === $nacionalidade->nome)>{{ $nacionalidade->nome }}</option>
 
       @endforeach
 
@@ -94,11 +94,11 @@
 
       <div class="col-md-4"><label class="form-label">Data de emissão</label><input type="date" name="data_emissao" class="form-control"></div>
 
-      <div class="col-md-6"><label class="form-label">Residência / bairro *</label><input name="endereco" class="form-control" required></div>
+      <div class="col-md-4"><label class="form-label">Residência / bairro *</label><input name="endereco" class="form-control" required></div>
 
-      <div class="col-md-3"><label class="form-label">Escola anterior</label><input name="escola_anterior" class="form-control"></div>
+      <div class="col-md-4"><label class="form-label">Escola anterior</label><input name="escola_anterior" class="form-control"></div>
 
-      <div class="col-md-3"><label class="form-label">Com quem vive a criança</label><input name="vive_com" class="form-control"></div>
+      <div class="col-md-4"><label class="form-label">Com quem vive a criança</label><input name="vive_com" class="form-control"></div>
 
      </div></div>
 
@@ -116,17 +116,44 @@
 
      @foreach(['pai'=>'Pai','mae'=>'Mãe','encarregado'=>'Encarregado de educação'] as $key=>$label)
 
-     <div class="col-12"><div class="progresso-section"><h5>{{ $label }} {{ $key === 'encarregado' ? '*' : '(opcional)' }}</h5><div class="row g-3">
+     <div class="col-12">
+        <div class="progresso-section"><h5>{{ $label }} {{ $key === 'encarregado' ? '*' : '(opcional)' }}</h5>
+     <div class="row g-3">
 
-      <div class="col-md-6"><label class="form-label">Nome {{ $label }}</label><input name="familia[{{ $key }}][nome]" class="form-control" {{ $key === 'encarregado' ? 'required' : '' }}></div>
+      <div class="col-md-4">
+        <label class="form-label">Nome {{ $label }}</label><input name="familia[{{ $key }}][nome]" class="form-control" {{ $key === 'encarregado' ? 'required' : '' }}>
+      </div>
 
       @if($key === 'encarregado')
 
-      <div class="col-md-3"><label class="form-label">Parentesco</label><select name="familia[encarregado][parentesco]" class="form-select"><option value="">Seleccione</option><option value="Pai">Pai</option><option value="Mãe">Mãe</option><option value="Avô/Avó">Avô/Avó</option><option value="Tio/Tia">Tio/Tia</option><option value="Tutor">Tutor</option><option value="Outro">Outro</option></select></div>
+      <div class="col-md-4"><label class="form-label">Parentesco</label><select name="familia[encarregado][parentesco]" class="form-select"><option value="">Seleccione</option><option value="Pai">Pai</option><option value="Mãe">Mãe</option><option value="Avô/Avó">Avô/Avó</option><option value="Tio/Tia">Tio/Tia</option><option value="Tutor">Tutor</option><option value="Outro">Outro</option></select></div>
 
       @endif
 
-      <div class="col-md-3"><label class="form-label">Nacionalidade</label><input name="familia[{{ $key }}][nacionalidade]" class="form-control"></div>
+      
+      <div class="col-md-4">
+          <label class="form-label">
+              Nacionalidade {{ $label }}
+          </label>
+
+          <select
+              name="familia[{{ $key }}][nacionalidade]"
+              class="form-select"
+          >
+              <option value="">Seleccione a nacionalidade</option>
+
+              @foreach(($nacionalidades ?? []) as $nacionalidade)
+                  <option
+                      value="{{ $nacionalidade->nome }}"
+                      @selected(old("familia.$key.nacionalidade", 'Moçambique') === $nacionalidade->nome)
+                  >
+                      {{ $nacionalidade->nome }}
+                  </option>
+              @endforeach
+
+          </select>
+      </div>
+
 
       <div class="col-md-4"><label class="form-label">Formação académica</label><input name="familia[{{ $key }}][formacao]" class="form-control"></div>
 
@@ -134,13 +161,13 @@
 
       <div class="col-md-4"><label class="form-label">Local de trabalho</label><input name="familia[{{ $key }}][local_trabalho]" class="form-control"></div>
 
-      <div class="col-md-3"><label class="form-label">Telefone</label><input name="familia[{{ $key }}][telefone]" class="form-control" {{ $key === 'encarregado' ? 'required' : '' }}></div>
+      <div class="col-md-4"><label class="form-label">Telefone</label><input name="familia[{{ $key }}][telefone]" class="form-control" {{ $key === 'encarregado' ? 'required' : '' }}></div>
 
-      <div class="col-md-3"><label class="form-label">Telefone alternativo</label><input name="familia[{{ $key }}][telefone2]" class="form-control"></div>
+      <div class="col-md-4"><label class="form-label">Telefone alternativo</label><input name="familia[{{ $key }}][telefone2]" class="form-control"></div>
 
-      <div class="col-md-3"><label class="form-label">Email</label><input type="email" name="familia[{{ $key }}][email]" class="form-control"></div>
+      <div class="col-md-4"><label class="form-label">Email</label><input type="email" name="familia[{{ $key }}][email]" class="form-control"></div>
 
-      <div class="col-md-3"><label class="form-label">Residência</label><input name="familia[{{ $key }}][residencia]" class="form-control" {{ $key === 'encarregado' ? 'required' : '' }}></div>
+      <div class="col-md-4"><label class="form-label">Residência</label><input name="familia[{{ $key }}][residencia]" class="form-control" {{ $key === 'encarregado' ? 'required' : '' }}></div>
 
      </div></div></div>
 
@@ -180,7 +207,11 @@
 
      <div class="col-md-6"><label class="form-label">Modalidade de pagamento *</label><select name="modalidade_pagamento" class="form-select" required><option value="MENSAL">Mensal</option><option value="TRES_PRESTACOES">Três prestações</option><option value="ANUAL">Anual</option></select></div>
 
-     <div class="col-md-6"><label class="form-label">Bolsa de estudo</label><select name="bolsa_percentual" id="bolsaPercentual" class="form-select"><option value="0">Sem bolsa</option><option value="50">Bolsa 50%</option><option value="100">Bolsa 100%</option></select><small class="text-muted">A bolsa será aplicada às propinas curriculares, não à matrícula ou às actividades, salvo configuração futura.</small></div>
+     <div class="col-md-6">
+        <label class="form-label">Bolsa de estudo (em %)</label>
+          <input name="bolsa_percentual" id="bolsaPercentual" class="form-control" value="0">
+          <small class="text-muted">A bolsa será aplicada às propinas curriculares, não à matrícula ou às actividades, salvo configuração futura.</small>
+     </div>
 
      <div class="col-12"><p class="mb-2">Serviços e aulas extras (opcionais). Valores mensais configurados na base de dados.</p>
 
@@ -188,7 +219,7 @@
 
        @forelse(($atividades ?? []) as $atividade)
 
-       <div class="col-md-6"><label class="border rounded p-3 d-block"><input type="checkbox" name="atividades[]" value="{{ $atividade->id }}" data-valor="{{ $atividade->valor_mensal }}" class="form-check-input me-2 actividade-check">{{ $atividade->nome }} — {{ $atividade->tipo }} <span class="text-muted">({{ number_format($atividade->valor_mensal,2,',','.') }} MT/mês)</span></label></div>
+       <div class="col-md-6"><label class="border rounded p-3 d-block"><input type="checkbox" name="atividades[]" value="{{ $atividade->id }}" data-valor="{{ $atividade->valor_mensal }}" class="form-check-input me-2 actividade-check">{{ $atividade->nome }} — {{ $atividade->tipo }} <span class="text-muted">({{ number_format($atividade->valor_mensal,2,',','.') }} MT/{{$atividade->periodicidade}})</span></label></div>
 
        @empty
 

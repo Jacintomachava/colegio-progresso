@@ -72,6 +72,7 @@
                             <th>Nome</th>
                             <th>Classe</th>
                             <th>Tipo</th>
+                            <th>Aluno</th>
                             <th>Valor</th>
                             <th>Data</th>
                             <th>Acção</th>
@@ -103,6 +104,7 @@
                                         </span>
                                     @endif
                                 </td>
+                                <td>{{$alunosMatriculado->tipo}}</td>
                                 <td>
                                     {{ number_format($alunosMatriculado->valor_total, 2, ',', '.') }}
                                 </td>    
@@ -110,25 +112,19 @@
                                 <td>{{$alunosMatriculado->updated_at->format('d-M-Y')}}</td>
                                 <td>
 
-                                    <a href="{{ route('progresso.matriculas.ficha', [
-                                            'alunoId' => $alunosMatriculado->aluno->id
-                                        ]) }}"
-                                    target="_blank"
-                                    rel="noopener"
-                                    class="btn btn-outline-primary">
-
-                                        <i class="fas fa-file-pdf"></i>
+                                    <a href="{{ route('progresso.matriculas.ficha', ['alunoId' => $alunosMatriculado->aluno->id]) }}" target="_blank" rel="noopener"
+                                       class="btn btn-outline-primary btn-sm">
+                                        <i class="fa fa-folder-open"></i>
                                         Ficha do Aluno
-
                                     </a>
 
                                     <a href="{{ route('progresso.facturas.create', ['alunoId' => $alunosMatriculado->aluno->id]) }}"
-                                       class="btn btn-outline-primary btn-sm">
-                                        <i class="fa fa-file-text-o"></i>
+                                       class="btn btn-outline-warning btn-sm">
+                                        <i class="fa fa-file"></i>
                                         Gerar Factura
                                     </a>
                                     <a href="{{ route('progresso.pagamentos.create', ['alunoId' => $alunosMatriculado->aluno->id]) }}"
-                                        class="btn btn-success btn-xs" >
+                                        class="btn btn-outline-success btn-sm" >
                                             <i class="fa fa-money"></i>
                                             Pagar
 

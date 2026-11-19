@@ -503,5 +503,107 @@ class ProgressoPagamentoController extends Controller
         }
     }
 
+    public function pagarFactura(int $facturaId)
+    {
+        $escolaId = (int) auth()->user()->escola_id;
+
+        $factura = DB::table('progresso_facturas')
+            ->where('id', $facturaId)
+            ->where('escola_id', $escolaId)
+            ->whereIn('estado', ['PENDENTE', 'PARCIAL'])
+            ->first();
+
+        abort_unless($factura, 404, 'Factura indisponível.');
+
+        $alunoId = (int) $factura->aluno_id;
+
+        $aluno = DB::table('alunos')
+            ->where('id', $alunoId)
+            ->where('escola_id', $escolaId)
+            ->first();
+
+        $escola = DB::table('escolas')
+            ->where('id', $escolaId)
+            ->first();
+
+        $cobrancas = DB::table('progresso_factura_itens as fi')
+            ->join(
+                'progresso_cobrancas as c',
+                'c.id',
+                '=',
+                'fi.cobranca_id'
+            )
+            ->where('fi.factura_id', $factura->id)
+            ->where('c.escola_id', $escolaId)
+            ->where('c.aluno_id', $alunoId)
+            ->whereIn('c.estado', ['PENDENTE', 'PARCIAL'])
+            ->select(
+                'c.*',
+                'fi.valor_total as valor_facturado'
+            )
+            ->get();
+
+        foreach ($cobrancas as $cobranca) {
+
+            $valorPago = DB::table('progresso_pagamento_itens as pi')
+                ->join(
+                    'progresso_pagamentos as p',
+                    'p.id',
+                    '=',
+                    'pi.pagamento_id'
+                )
+                ->where('pi.cobranca_id', $cobranca->id)
+                ->where('p.escola_id', $escolaId)
+                ->where('p.aluno_id', $alunoId)
+                ->where('p.estado', 'CONFIRMADO')
+                ->sum('pi.valor_aplicado');
+
+            $cobranca->valor_pago = (float) $valorPago;
+
+            $cobranca->saldo_principal = max(
+                0,
+                round(
+                    (float) $cobranca->valor_facturado
+                    - (float) $valorPago,
+                    2
+                )
+            );
+
+            // A factura já foi emitida.
+            $cobranca->multa_simulada = 0;
+        }
+
+        $cobrancas = $cobrancas
+            ->filter(fn ($c) => $c->saldo_principal > 0.001)
+            ->values();
+
+        abort_if(
+            $cobrancas->isEmpty(),
+            422,
+            'Esta factura não possui valores pendentes.'
+        );
+
+        $saldoAluno = DB::table('progresso_aluno_creditos')
+            ->where('escola_id', $escolaId)
+            ->where('aluno_id', $alunoId)
+            ->value('saldo') ?? 0;
+
+        $contas = DB::table('progresso_contas_financeiras')
+            ->where('escola_id', $escolaId)
+            ->where('activo', 1)
+            ->orderBy('nome')
+            ->get();
+
+        $facturaSelecionada = $factura;
+
+        return view('progresso.pagamentos.pagar_factura', compact(
+            'facturaSelecionada',
+            'aluno',
+            'escola',
+            'cobrancas',
+            'saldoAluno',
+            'contas'
+        ));
+    }
 
 }

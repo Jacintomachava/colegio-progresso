@@ -211,6 +211,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/transferencia/aluno', [MatriculaController::class, 'transferencia'])->name('transferencia.aluno');
     Route::get('/alunos/transferidos', [MatriculaController::class, 'alunosTransferidos'])->name('alunos.transferidas');
 
+    Route::get('/progresso/facturas/{facturaId}/pagar',[ProgressoPagamentoController::class, 'pagarFactura'])->name('progresso.facturas.pagar');
+
     //Mensagens Periodicas
     Route::get('/mensagem/templete', [TempleteSMSController::class, 'create'])->name('SMSperidica.create');
     Route::post('/mensagem/templete', [TempleteSMSController::class, 'store'])->name('SMSperidica.store');

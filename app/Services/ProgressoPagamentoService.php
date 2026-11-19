@@ -124,19 +124,6 @@ class ProgressoPagamentoService
                     );
                 }
 
-                if ($cobranca->tipo === 'PROPINA') {
-
-                    $simulacao = app(
-                        ProgressoCobrancaMultaService::class
-                    )->simular((int) $cobranca->id);
-
-                    if ($this->centavos($simulacao['multa'] ?? '0') > 0) {
-                        $this->erro(
-                            "Cobrança {$cobranca->id} possui multa pendente de facturação."
-                        );
-                    }
-                }
-
                 $facturaExistente = DB::table('progresso_factura_itens')
                     ->where('cobranca_id', $cobranca->id)
                     ->first();
@@ -159,6 +146,19 @@ class ProgressoPagamentoService
                     }
 
                     continue;
+                }
+
+                if ($cobranca->tipo === 'PROPINA') {
+
+                    $simulacao = app(
+                        ProgressoCobrancaMultaService::class
+                    )->simular((int) $cobranca->id);
+
+                    if ($this->centavos($simulacao['multa'] ?? '0') > 0) {
+                        $this->erro(
+                            "Cobrança {$cobranca->id} possui multa pendente de facturação."
+                        );
+                    }
                 }
 
                 // Não emitir automaticamente uma cobrança já parcialmente paga.
@@ -201,15 +201,6 @@ class ProgressoPagamentoService
                 }
                 if ($cobranca->tipo === 'MULTA') {
                     $this->erro('Liquidação de multas ainda não activada.');
-                }
-
-                // Multas de propinas vencidas devem ser facturadas antes de receber.
-                if ($cobranca->tipo === 'PROPINA') {
-                    $simulacao = app(ProgressoCobrancaMultaService::class)
-                        ->simular((int) $cobranca->id);
-                    if ($this->centavos($simulacao['multa'] ?? '0') > 0) {
-                        $this->erro("Cobrança {$cobranca->id} possui multa pendente de facturação.");
-                    }
                 }
 
                 $facturaItem = DB::table('progresso_factura_itens as fi')
@@ -428,6 +419,7 @@ class ProgressoPagamentoService
             }
 
             app(ProgressoReciboService::class)->emitir($pagamentoId);
+
 
             return DB::table('progresso_pagamentos')->where('id', $pagamentoId)->first();
         }, 3);

@@ -6,11 +6,9 @@ use Illuminate\Support\Facades\DB;
 
 class ProgressoDocumentoNumeroService
 {
-    public function gerar(
-        int $escolaId,
-        string $tipo
-    ): string {
-
+    
+    public function gerar(int $escolaId, string $tipo): string
+    {
         if (!in_array($tipo, ['FT', 'RC'], true)) {
             throw new \InvalidArgumentException(
                 'Tipo de documento inválido.'
@@ -19,7 +17,7 @@ class ProgressoDocumentoNumeroService
 
         $ano = (int) now()->year;
 
-        // Executar dentro de DB::transaction()
+        // Executar dentro de DB::transaction().
         DB::table('progresso_documento_sequencias')
             ->insertOrIgnore([
                 'escola_id' => $escolaId,
@@ -41,7 +39,7 @@ class ProgressoDocumentoNumeroService
             );
         }
 
-        $numero = $sequencia->ultimo + 1;
+        $numero = (int) $sequencia->ultimo + 1;
 
         DB::table('progresso_documento_sequencias')
             ->where('escola_id', $escolaId)
@@ -54,8 +52,9 @@ class ProgressoDocumentoNumeroService
         return sprintf(
             '%s%02d%04d',
             $tipo,
-            $numero,
-            $ano
+            $ano % 100,
+            $numero
         );
     }
+
 }

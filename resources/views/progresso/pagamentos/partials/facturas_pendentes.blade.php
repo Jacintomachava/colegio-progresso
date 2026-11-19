@@ -73,18 +73,12 @@
                             </td>
 
                             <td>
-                                <button
-                                    type="button"
-                                    class="btn btn-success btn-sm btn-pagar-factura"
-                                    data-id="{{ $factura->id }}"
-                                    data-numero="{{ $factura->numero }}"
-                                    data-saldo="{{ $factura->saldo_pendente }}"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#modalPagamentoFactura">
+                                <a href="{{ route('progresso.facturas.pagar', $factura->id) }}"
+                                    class="btn btn-sm btn-success">
 
-                                    <i class="fa fa-money"></i>
+                                    <i class="fas fa-money-bill-wave me-1"></i>
                                     Pagar
-                                </button>
+                                </a>
                             </td>
                         </tr>
                     @endforeach

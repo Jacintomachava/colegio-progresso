@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use App\Services\ProgressoFacturaService;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class ProgressoFacturaController extends Controller

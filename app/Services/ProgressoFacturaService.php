@@ -573,6 +573,9 @@ class ProgressoFacturaService
 
                     'estado' => 'PENDENTE',
 
+                    // Utilizador que emitiu a factura
+                    'user_id' => auth()->id(),
+
                     'observacoes' => $observacoes,
 
                     'created_at' => now(),

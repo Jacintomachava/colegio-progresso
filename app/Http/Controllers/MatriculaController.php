@@ -101,6 +101,8 @@ class MatriculaController extends Controller
                 ->where('escola_id', Auth::user()->escola_id)
                 ->get();
 
+    
+
         // Buscar Alunos Que nao pagaram Matricula
         $alunosNaoPagouMatriculas = Matricula::with('aluno') // Certifique-se de carregar a relação 'pessoa' também
                 ->where('escola_id', Auth::user()->escola_id)
@@ -217,7 +219,7 @@ class MatriculaController extends Controller
 
         $atividades = DB::table('progresso_atividades')
             ->where('estado', 'ACTIVO')
-            ->whereIn('tipo', ['SERVICO', 'AULA_EXTRA'])
+            //->whereIn('tipo', ['SERVICO', 'AULA_EXTRA'])
             ->orderBy('tipo')
             ->orderBy('nome')
             ->get();
@@ -612,7 +614,17 @@ class MatriculaController extends Controller
                         'classe' => 'Classe sem valores configurados para a escola e ano académico.'
                     ]);
                 }
-                $valorMatricula = (float) $valores->valor_matricula;
+
+                /*
+                |--------------------------------------------------------------------------
+                | TIPO DE ALUNO E VALOR DA MATRÍCULA
+                |--------------------------------------------------------------------------
+                */
+                $classeNormal = (bool) $classe->classe;
+
+                $tipoAluno = $classeNormal ? 'INTERNO' : 'EXTERNO';
+
+                $valorMatricula = $classeNormal ? round((float) $valores->valor_matricula, 2) : 0.00;
 
                 // Fotografia (ficheiro ou captura pela câmara).
                 $avatar = 'avatar.png';
@@ -664,6 +676,7 @@ class MatriculaController extends Controller
                     'pessoa_id' => $pessoaId,
                     'escola_id' => $escolaId,
                     'classe_id' => $classe->id,
+                    'tipo' => $tipoAluno,
                     'provincia_id' => (int) $dados['provincia'],
                     'avatar' => $avatar,
                     'suspenso' => 0,
@@ -724,6 +737,7 @@ class MatriculaController extends Controller
                     'renovacao' => 0,
                     'classe_id' => $classe->id,
                     'ano_academico_id' => $anoAcademico->id,
+                    'tipo' => $tipoAluno,
                     'aluno_id' => $alunoId,
                     'escola_id' => $escolaId,
                     'turma_id' => null,
@@ -835,23 +849,33 @@ class MatriculaController extends Controller
                     }
                 }
 
-                $cobrancaId = DB::table('progresso_cobrancas')->insertGetId([
-                    'escola_id' => $escolaId,
-                    'aluno_id' => $alunoId,
-                    'matricula_id' => $matriculaId,
-                    'tipo' => 'MATRICULA',
-                    'origem_id' => $matriculaId,
-                    'descricao' => 'Matrícula - ' . $classe->nome,
-                    'ano' => $ano,
-                    'mes' => null,
-                    'valor_original' => $valorMatricula,
-                    'valor_desconto' => 0,
-                    'valor_total' => $valorMatricula,
-                    'data_vencimento' => now()->toDateString(),
-                    'estado' => 'PENDENTE',
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+               /*
+                |--------------------------------------------------------------------------
+                | COBRANÇA DE MATRÍCULA
+                |--------------------------------------------------------------------------
+                */
+                if ($classeNormal && $valorMatricula > 0) {
+
+                    DB::table('progresso_cobrancas')->insert([
+                        'escola_id' => $escolaId,
+                        'aluno_id' => $alunoId,
+                        'matricula_id' => $matriculaId,
+                        'tipo' => 'MATRICULA',
+                        'origem_id' => $matriculaId,
+                        'descricao' => 'Matrícula - ' . $classe->nome,
+                        'ano' => $ano,
+                        'mes' => null,
+                        'valor_original' => $valorMatricula,
+                        'valor_desconto' => 0,
+                        'valor_iva' => 0,
+                        'taxa_iva' => 0,
+                        'valor_total' => $valorMatricula,
+                        'data_vencimento' => now()->toDateString(),
+                        'estado' => 'PENDENTE',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
 
                 $cobrancasService->gerar(
                     escolaId: $escolaId,
@@ -866,15 +890,31 @@ class MatriculaController extends Controller
 
                 if ((bool) ($escola->sms_activo ?? false)) {
                     $telefoneEncarregado = trim((string) $encarregado['telefone']);
+
                     if ($telefoneEncarregado !== '') {
-                        $textoSms = sprintf(
-                            'Colegio Progresso: O aluno %s foi matriculado na %s. Codigo: %s. Matricula: %s. Valor: %s MT. Pagamento pendente.',
-                            $dados['nomealuno'],
-                            $classe->nome,
-                            $codigoAluno,
-                            $codigoMatricula,
-                            number_format($valorMatricula, 2, ',', '.')
-                        );
+
+                        if ($classeNormal) {
+
+                            $textoSms = sprintf(
+                                'Colegio Progresso: %s matriculado na %s. Codigo: %s. Matricula: %s. Valor: %s MT.',
+                                $dados['nomealuno'],
+                                $classe->nome,
+                                $codigoAluno,
+                                $codigoMatricula,
+                                number_format($valorMatricula, 2, ',', '.')
+                            );
+
+                        } else {
+
+                            $textoSms = sprintf(
+                                'Colegio Progresso: Inscricao de %s no curso %s registada. Codigo: %s. Inscricao: %s. Consulte os valores na secretaria.',
+                                $dados['nomealuno'],
+                                $classe->nome,
+                                $codigoAluno,
+                                $codigoMatricula
+                            );
+                        }
+
                         DB::table('mensagem')->insert([
                             'escola_id' => $escolaId,
                             'telefone' => $telefoneEncarregado,
@@ -899,15 +939,17 @@ class MatriculaController extends Controller
                 ];
             }, 3);
 
-            return response()->json([
-                'status' => 1,
-                'message' => 'Matrícula ' . $resultado['codigo_matricula']
-                    . ' registada com sucesso. Aluno: ' . $resultado['codigo_aluno'],
-                'aluno_id' => $resultado['aluno_id'],
-                'matricula_id' => $resultado['matricula_id'],
-                'codigo_aluno' => $resultado['codigo_aluno'],
-                'codigo_matricula' => $resultado['codigo_matricula'],
-            ]);
+        return response()->json([
+            'status' => 1,
+            'message' => 'Matrícula '. $resultado['codigo_matricula']. ' registada com sucesso. Aluno: '. $resultado['codigo_aluno'],
+            'aluno_id' => $resultado['aluno_id'],
+            'matricula_id' => $resultado['matricula_id'],
+            'codigo_aluno' => $resultado['codigo_aluno'],
+            'codigo_matricula' => $resultado['codigo_matricula'],
+            'factura_url' => route('progresso.facturas.create', ['alunoId' => $resultado['aluno_id']]),
+        ]);
+
+
         } catch (\Throwable $e) {
             if ($fotoGuardada) {
                 Storage::disk('public')->delete($fotoGuardada);
